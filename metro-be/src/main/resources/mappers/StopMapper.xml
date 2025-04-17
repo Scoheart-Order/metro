@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.StopMapper">
+
+    <select id="getAllStops" resultType="com.scoding.metro.entity.Stop">
+        SELECT * FROM stop
+    </select>
+
+    <select id="getStopById" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Stop">
+        SELECT * FROM stop WHERE id = #{id}
+    </select>
+
+    <select id="getStopsByRouteId" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Stop">
+        SELECT * FROM stop WHERE route_id = #{routeId} ORDER BY seq
+    </select>
+
+    <select id="getStopsByStationId" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Stop">
+        SELECT * FROM stop WHERE station_id = #{stationId}
+    </select>
+
+    <select id="getStopByRouteAndStation" resultType="com.scoding.metro.entity.Stop">
+        SELECT * FROM stop WHERE route_id = #{routeId} AND station_id = #{stationId}
+    </select>
+
+    <select id="getAllTransferStops" resultType="com.scoding.metro.entity.Stop">
+        SELECT * FROM stop WHERE is_transfer = true
+    </select>
+
+    <insert id="insertStop" parameterType="com.scoding.metro.entity.Stop" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stop(route_id, station_id, seq, is_transfer)
+        VALUES(#{routeId}, #{stationId}, #{seq}, #{isTransfer})
+    </insert>
+
+    <update id="updateStop" parameterType="com.scoding.metro.entity.Stop">
+        UPDATE stop SET route_id = #{routeId}, station_id = #{stationId},
+        seq = #{seq}, is_transfer = #{isTransfer} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteStop" parameterType="java.lang.Long">
+        DELETE FROM stop WHERE id = #{id}
+    </delete>
+</mapper> 

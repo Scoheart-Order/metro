@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.StationMapper">
+
+    <select id="getAllStations" resultType="com.scoding.metro.entity.Station">
+        SELECT * FROM station
+    </select>
+
+    <select id="getStationById" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Station">
+        SELECT * FROM station WHERE id = #{id}
+    </select>
+
+    <select id="getStationByCode" parameterType="java.lang.String" resultType="com.scoding.metro.entity.Station">
+        SELECT * FROM station WHERE code = #{code}
+    </select>
+
+    <select id="getStationsByLineId" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Station">
+        SELECT s.* FROM station s
+        JOIN stop st ON s.id = st.station_id
+        JOIN route r ON st.route_id = r.id
+        WHERE r.line_id = #{lineId} ORDER BY st.seq
+    </select>
+
+    <select id="getStationsByRouteId" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Station">
+        SELECT s.* FROM station s
+        JOIN stop st ON s.id = st.station_id
+        WHERE st.route_id = #{routeId} ORDER BY st.seq
+    </select>
+
+    <insert id="insertStation" parameterType="com.scoding.metro.entity.Station" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO station(name, code)
+        VALUES(#{name}, #{code})
+    </insert>
+
+    <update id="updateStation" parameterType="com.scoding.metro.entity.Station">
+        UPDATE station SET name = #{name}, code = #{code}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteStation" parameterType="java.lang.Long">
+        DELETE FROM station WHERE id = #{id}
+    </delete>
+</mapper> 

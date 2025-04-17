@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.UserMapper">
+
+    <resultMap id="userResultMap" type="com.scoding.metro.entity.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="enabled" column="enabled"/>
+        <result property="accountNonExpired" column="account_non_expired"/>
+        <result property="accountNonLocked" column="account_non_locked"/>
+        <result property="credentialsNonExpired" column="credentials_non_expired"/>
+        <result property="money" column="money"/>
+        <result property="realName" column="real_name"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="gender" column="gender"/>
+        <result property="birthDate" column="birth_date"/>
+        <result property="avatar" column="avatar"/>
+        <result property="address" column="address"/>
+        <result property="bio" column="bio"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <collection property="roles" ofType="com.scoding.metro.entity.Role">
+            <id property="id" column="role_id"/>
+            <result property="name" column="role_name"/>
+            <result property="description" column="role_description"/>
+        </collection>
+    </resultMap>
+
+    <select id="getUserByUsername" resultMap="userResultMap">
+        SELECT u.*, r.id as role_id, r.name as role_name, r.description as role_description
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE u.username = #{username}
+    </select>
+    
+    <select id="getUserByPhone" resultMap="userResultMap">
+        SELECT u.*, r.id as role_id, r.name as role_name, r.description as role_description
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE u.phone = #{phone}
+    </select>
+    
+    <select id="getUserById" resultMap="userResultMap">
+        SELECT u.*, r.id as role_id, r.name as role_name, r.description as role_description
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE u.id = #{id}
+    </select>
+
+    <insert id="saveUser" parameterType="com.scoding.metro.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (
+            username, password, enabled, account_non_expired, account_non_locked, 
+            credentials_non_expired, money, real_name, email, phone, gender, 
+            birth_date, avatar, address, bio, create_time, update_time
+        )
+        VALUES (
+            #{username}, #{password}, #{enabled}, #{accountNonExpired}, #{accountNonLocked}, 
+            #{credentialsNonExpired}, #{money}, #{realName}, #{email}, #{phone}, #{gender}, 
+            #{birthDate}, #{avatar}, #{address}, #{bio}, #{createTime}, #{updateTime}
+        )
+    </insert>
+    
+    <update id="updateUserMoney">
+        UPDATE users SET money = #{money} WHERE id = #{userId}
+    </update>
+    
+    <update id="updateUserProfile" parameterType="com.scoding.metro.entity.User">
+        UPDATE users
+        SET real_name = #{realName},
+            email = #{email},
+            phone = #{phone},
+            gender = #{gender},
+            birth_date = #{birthDate},
+            avatar = #{avatar},
+            address = #{address},
+            bio = #{bio},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+    
+    <update id="updatePassword">
+        UPDATE users
+        SET password = #{newPassword}
+        WHERE id = #{userId}
+    </update>
+    
+    <!-- 获取所有用户（包含角色信息） -->
+    <select id="listAllWithRoles" resultMap="userResultMap">
+        SELECT u.*, r.id as role_id, r.name as role_name, r.description as role_description
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        ORDER BY u.id
+    </select>
+    
+    <!-- 根据ID获取用户信息（包含角色信息） -->
+    <select id="getUserByIdWithRoles" resultMap="userResultMap">
+        SELECT u.*, r.id as role_id, r.name as role_name, r.description as role_description
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE u.id = #{id}
+    </select>
+    
+    <!-- 保存用户角色关系 -->
+    <insert id="saveUserRole">
+        INSERT INTO user_roles (user_id, role_id)
+        VALUES (#{userId}, #{roleId})
+    </insert>
+    
+    <!-- 删除用户角色关系 -->
+    <delete id="removeUserRoles">
+        DELETE FROM user_roles
+        WHERE user_id = #{userId}
+    </delete>
+    
+    <!-- 更新用户状态 -->
+    <update id="updateUserStatus">
+        UPDATE users
+        SET enabled = #{enabled},
+            update_time = NOW()
+        WHERE id = #{userId}
+    </update>
+    
+    <!-- 删除用户 -->
+    <delete id="removeById">
+        DELETE FROM users
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

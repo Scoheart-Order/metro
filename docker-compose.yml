@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # Database Service
+  metro-db:
+    build: ./metro-db
+    container_name: metro-db
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: metro
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - metro-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot888"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Backend Service
+  metro-be:
+    build: ./metro-be
+    container_name: metro-be
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - metro-db
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - metro-network
+
+  # Frontend Service
+  metro-fe:
+    build: ./metro-fe
+    container_name: metro-fe
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - metro-be
+    networks:
+      - metro-network
+
+networks:
+  metro-network:
+    driver: bridge
+
+volumes:
+  mysql-data: 

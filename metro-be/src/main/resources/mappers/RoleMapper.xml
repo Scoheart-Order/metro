@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.RoleMapper">
+
+    <resultMap id="roleResultMap" type="com.scoding.metro.entity.Role">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+    </resultMap>
+
+    <select id="getRolesByUserId" resultMap="roleResultMap">
+        SELECT r.*
+        FROM roles r
+        INNER JOIN user_roles ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId}
+    </select>
+
+    <insert id="saveRole" parameterType="com.scoding.metro.entity.Role" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO roles (name, description)
+        VALUES (#{name}, #{description})
+    </insert>
+
+    <insert id="saveUserRole">
+        INSERT INTO user_roles (user_id, role_id)
+        VALUES (#{userId}, #{roleId})
+    </insert>
+    
+    <select id="getRoleByName" resultMap="roleResultMap">
+        SELECT *
+        FROM roles
+        WHERE name = #{name}
+        LIMIT 1
+    </select>
+    
+    <select id="getAllRoles" resultMap="roleResultMap">
+        SELECT *
+        FROM roles
+    </select>
+
+</mapper> 

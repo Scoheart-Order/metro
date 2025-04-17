@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.AnnouncementMapper">
+
+    <resultMap id="announcementResultMap" type="com.scoding.metro.entity.Announcement">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="adminId" column="admin_id"/>
+        <result property="adminUsername" column="admin_username"/>
+    </resultMap>
+
+    <select id="getAllAnnouncements" resultMap="announcementResultMap">
+        SELECT a.*, u.username as admin_username
+        FROM announcements a
+        LEFT JOIN users u ON a.admin_id = u.id
+        ORDER BY a.create_time DESC
+    </select>
+
+    <select id="getAnnouncementById" resultMap="announcementResultMap">
+        SELECT a.*, u.username as admin_username
+        FROM announcements a
+        LEFT JOIN users u ON a.admin_id = u.id
+        WHERE a.id = #{id}
+    </select>
+
+    <insert id="saveAnnouncement" parameterType="com.scoding.metro.entity.Announcement" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO announcements (title, content, admin_id)
+        VALUES (#{title}, #{content}, #{adminId})
+    </insert>
+
+    <update id="updateAnnouncement" parameterType="com.scoding.metro.entity.Announcement">
+        UPDATE announcements
+        SET title = #{title},
+            content = #{content}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteAnnouncement">
+        DELETE FROM announcements
+        WHERE id = #{id}
+    </delete>
+
+</mapper> 

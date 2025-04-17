@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.RouteMapper">
+
+    <!-- Result map for Route with related line and station information -->
+    <resultMap id="routeResultMap" type="com.scoding.metro.entity.Route">
+        <id property="id" column="id"/>
+        <result property="lineId" column="line_id"/>
+        <result property="name" column="name"/>
+        <result property="startStationId" column="start_station_id"/>
+        <result property="endStationId" column="end_station_id"/>
+    </resultMap>
+
+    <select id="getAllRoutes" resultMap="routeResultMap">
+        SELECT r.* 
+        FROM route r
+    </select>
+
+    <select id="getRouteById" parameterType="java.lang.Long" resultMap="routeResultMap">
+        SELECT r.*
+        FROM route r
+        WHERE r.id = #{id}
+    </select>
+
+    <select id="getRoutesByLineId" parameterType="java.lang.Long" resultMap="routeResultMap">
+        SELECT r.* 
+        FROM route r
+        WHERE r.line_id = #{lineId}
+    </select>
+
+    <select id="getRouteByLineIdAndName" resultMap="routeResultMap">
+        SELECT r.*
+        FROM route r
+        WHERE r.line_id = #{lineId} AND r.name = #{name}
+    </select>
+
+    <insert id="insertRoute" parameterType="com.scoding.metro.entity.Route" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO route(line_id, name, start_station_id, end_station_id)
+        VALUES(#{lineId}, #{name}, #{startStationId}, #{endStationId})
+    </insert>
+
+    <update id="updateRoute" parameterType="com.scoding.metro.entity.Route">
+        UPDATE route SET line_id = #{lineId}, name = #{name},
+        start_station_id = #{startStationId}, end_station_id = #{endStationId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteRoute" parameterType="java.lang.Long">
+        DELETE FROM route WHERE id = #{id}
+    </delete>
+
+    <select id="findRoutesConnectingStations" resultMap="routeResultMap">
+        SELECT r.* FROM route r
+        JOIN stop s1 ON r.id = s1.route_id
+        JOIN stop s2 ON r.id = s2.route_id
+        WHERE s1.station_id = #{stationId1} AND s2.station_id = #{stationId2}
+        AND s1.seq &lt; s2.seq
+    </select>
+</mapper> 

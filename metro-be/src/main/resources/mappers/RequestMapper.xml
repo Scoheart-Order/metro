@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoding.metro.mapper.RequestMapper">
+    
+    <resultMap id="RequestResultMap" type="com.scoding.metro.entity.RequestDO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="title" column="title"/>
+        <result property="content" column="content"/>
+        <result property="status" column="status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="username" column="username"/>
+    </resultMap>
+
+    <select id="listRequests" resultMap="RequestResultMap">
+        SELECT r.*, u.username
+        FROM request r
+        LEFT JOIN users u ON r.user_id = u.id
+        ORDER BY r.created_at DESC
+    </select>
+
+    <select id="getRequestById" resultMap="RequestResultMap">
+        SELECT r.*, u.username
+        FROM request r
+        LEFT JOIN users u ON r.user_id = u.id
+        WHERE r.id = #{id}
+    </select>
+
+    <select id="listRequestsByUserId" resultMap="RequestResultMap">
+        SELECT r.*, u.username
+        FROM request r
+        LEFT JOIN users u ON r.user_id = u.id
+        WHERE r.user_id = #{userId}
+        ORDER BY r.created_at DESC
+    </select>
+
+    <insert id="saveRequest" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO request (user_id, title, content, status, created_at)
+        VALUES (#{userId}, #{title}, #{content}, #{status}, #{createdAt})
+    </insert>
+
+    <update id="updateRequest">
+        UPDATE request
+        SET title = #{title},
+            content = #{content},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateRequestStatus">
+        UPDATE request
+        SET status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="removeRequest">
+        DELETE FROM request
+        WHERE id = #{id}
+    </delete>
+
+</mapper> 

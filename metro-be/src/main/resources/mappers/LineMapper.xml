@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.LineMapper">
+
+    <select id="getAllLines" resultType="com.scoding.metro.entity.Line">
+        SELECT * FROM line
+    </select>
+
+    <select id="getLineById" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Line">
+        SELECT * FROM line WHERE id = #{id}
+    </select>
+
+    <select id="getLineByCode" parameterType="java.lang.String" resultType="com.scoding.metro.entity.Line">
+        SELECT * FROM line WHERE code = #{code}
+    </select>
+
+    <insert id="insertLine" parameterType="com.scoding.metro.entity.Line" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO line(name, code, color, operator)
+        VALUES(#{name}, #{code}, #{color}, #{operator})
+    </insert>
+
+    <update id="updateLine" parameterType="com.scoding.metro.entity.Line">
+        UPDATE line SET name = #{name}, code = #{code},
+        color = #{color}, operator = #{operator} WHERE id = #{id}
+    </update>
+
+    <delete id="deleteLine" parameterType="java.lang.Long">
+        DELETE FROM line WHERE id = #{id}
+    </delete>
+</mapper> 

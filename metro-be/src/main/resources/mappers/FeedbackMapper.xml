@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.scoding.metro.mapper.FeedbackMapper">
+    
+    <resultMap id="FeedbackResultMap" type="com.scoding.metro.entity.FeedbackDO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="content" column="content"/>
+        <result property="rating" column="rating"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="username" column="username"/>
+    </resultMap>
+
+    <select id="listFeedbacks" resultMap="FeedbackResultMap">
+        SELECT f.*, u.username
+        FROM feedback f
+        LEFT JOIN users u ON f.user_id = u.id
+        ORDER BY f.created_at DESC
+    </select>
+
+    <select id="getFeedbackById" resultMap="FeedbackResultMap">
+        SELECT f.*, u.username
+        FROM feedback f
+        LEFT JOIN users u ON f.user_id = u.id
+        WHERE f.id = #{id}
+    </select>
+
+    <select id="listFeedbacksByUserId" resultMap="FeedbackResultMap">
+        SELECT f.*, u.username
+        FROM feedback f
+        LEFT JOIN users u ON f.user_id = u.id
+        WHERE f.user_id = #{userId}
+        ORDER BY f.created_at DESC
+    </select>
+
+    <insert id="saveFeedback" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO feedback (user_id, content, rating, created_at)
+        VALUES (#{userId}, #{content}, #{rating}, #{createdAt})
+    </insert>
+
+    <update id="updateFeedback">
+        UPDATE feedback
+        SET content = #{content},
+            rating = #{rating}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="removeFeedback">
+        DELETE FROM feedback
+        WHERE id = #{id}
+    </delete>
+
+</mapper> 
