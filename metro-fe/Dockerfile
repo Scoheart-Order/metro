@@ -3,6 +3,9 @@ FROM node:16 AS build
 
 WORKDIR /app
 
+# Configure NPM to use Taobao registry
+RUN npm config set registry https://registry.npmmirror.com
+
 # Copy package.json and package-lock.json first for better caching
 COPY package*.json ./
 RUN npm install
