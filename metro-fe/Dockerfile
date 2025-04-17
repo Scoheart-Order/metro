@@ -1,6 +1,10 @@
 # Build stage
 FROM node:16 AS build
 
+# 配置 NPM 缓存目录
+ARG NPM_CONFIG_CACHE
+ENV NPM_CONFIG_CACHE=$NPM_CONFIG_CACHE
+
 WORKDIR /app
 
 # Configure NPM to use Taobao registry

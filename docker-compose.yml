@@ -23,7 +23,10 @@ services:
 
   # Backend Service
   metro-be:
-    build: ./metro-be
+    build: 
+      context: ./metro-be
+      args:
+        - MAVEN_OPTS=-Dmaven.repo.local=/root/.m2/repository
     container_name: metro-be
     restart: always
     ports:
@@ -34,18 +37,25 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+    volumes:
+      - maven-repo:/root/.m2/repository
     networks:
       - metro-network
 
   # Frontend Service
   metro-fe:
-    build: ./metro-fe
+    build: 
+      context: ./metro-fe
+      args:
+        - NPM_CONFIG_CACHE=/app/npm-cache
     container_name: metro-fe
     restart: always
     ports:
       - "80:80"
     depends_on:
       - metro-be
+    volumes:
+      - npm-cache:/app/npm-cache
     networks:
       - metro-network
 
@@ -54,4 +64,6 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data: 
+  mysql-data:
+  maven-repo:
+  npm-cache: 
