@@ -7,7 +7,7 @@ services:
     container_name: metro-db
     restart: always
     ports:
-      - "3306:3306"
+      - '3306:3306'
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: metro
@@ -19,21 +19,22 @@ services:
     networks:
       - metro-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      test:
+        ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-proot']
       interval: 10s
       timeout: 5s
       retries: 5
 
   # Backend Service
   metro-be:
-    build: 
+    build:
       context: ./metro-be
       args:
         - MAVEN_OPTS=-Dmaven.repo.local=/root/.m2/repository
     container_name: metro-be
     restart: always
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
       metro-db:
         condition: service_healthy
@@ -43,23 +44,17 @@ services:
       - maven-repo:/root/.m2/repository
     networks:
       - metro-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   # Frontend Service
   metro-fe:
-    build: 
+    build:
       context: ./metro-fe
       args:
         - NPM_CONFIG_CACHE=/app/npm-cache
     container_name: metro-fe
     restart: always
     ports:
-      - "80:80"
+      - '80:80'
     depends_on:
       metro-be:
         condition: service_healthy
@@ -74,4 +69,4 @@ networks:
 
 volumes:
   maven-repo:
-  npm-cache: 
+  npm-cache:
