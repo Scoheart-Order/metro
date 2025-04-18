@@ -4,16 +4,17 @@ services:
   # Database Service
   metro-db:
     image: mysql:8.0
-    restart: always
     ports:
       - '3306:3306'
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: metro
-      MYSQL_USER: metro
-      MYSQL_PASSWORD: metro
+      - MYSQL_ROOT_PASSWORD=88888888
+      - MYSQL_DATABASE=metro
+      - MYSQL_USER=metro
+      - MYSQL_PASSWORD=metro
     volumes:
-      - ./metro-db/init.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - mysql-data:/var/lib/mysql
+      - ./metro-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
 
   # Backend Service
   metro-be:
