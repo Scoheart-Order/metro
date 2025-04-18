@@ -4,7 +4,6 @@ services:
   # Database Service
   metro-db:
     image: mysql:8.0
-    container_name: metro-db
     restart: always
     ports:
       - '3306:3306'
@@ -14,65 +13,26 @@ services:
       MYSQL_USER: metro
       MYSQL_PASSWORD: metro
     volumes:
-      # Mount init.sql directly to ensure it runs on startup
       - ./metro-db/init.sql:/docker-entrypoint-initdb.d/1-schema.sql
-    networks:
-      - metro-network
-    healthcheck:
-      test:
-        ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-proot']
-      interval: 10s
-      timeout: 5s
-      retries: 5
 
   # Backend Service
   metro-be:
     build:
       context: ./metro-be
-      args:
-        - MAVEN_OPTS=-Dmaven.repo.local=/root/.m2/repository
-    container_name: metro-be
     restart: always
     ports:
       - '8080:8080'
     depends_on:
-      metro-db:
-        condition: service_healthy
+      - metro-db
     environment:
       SPRING_PROFILES_ACTIVE: docker
-    volumes:
-      - maven-repo:/root/.m2/repository
-    networks:
-      - metro-network
-    healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "8080"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 60s
 
   # Frontend Service
   metro-fe:
     build:
       context: ./metro-fe
-      args:
-        - NPM_CONFIG_CACHE=/app/npm-cache
-    container_name: metro-fe
     restart: always
     ports:
       - '80:80'
     depends_on:
-      metro-be:
-        condition: service_healthy
-    volumes:
-      - npm-cache:/app/npm-cache
-    networks:
-      - metro-network
-
-networks:
-  metro-network:
-    driver: bridge
-
-volumes:
-  maven-repo:
-  npm-cache:
+      - metro-be
