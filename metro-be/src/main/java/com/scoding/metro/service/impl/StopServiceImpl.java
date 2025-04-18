@@ -98,8 +98,6 @@ public class StopServiceImpl implements StopService {
         stop.setRouteId(stopDto.getRouteId());
         stop.setStationId(stopDto.getStationId());
         stop.setSeq(stopDto.getSeq());
-        stop.setArrivalTime(stopDto.getArrivalTime());
-        stop.setDepartureTime(stopDto.getDepartureTime());
         
         stopMapper.insertStop(stop);
         
@@ -152,8 +150,6 @@ public class StopServiceImpl implements StopService {
         stop.setRouteId(stopDto.getRouteId());
         stop.setStationId(stopDto.getStationId());
         stop.setSeq(stopDto.getSeq());
-        stop.setArrivalTime(stopDto.getArrivalTime());
-        stop.setDepartureTime(stopDto.getDepartureTime());
         
         stopMapper.updateStop(stop);
         
@@ -177,8 +173,6 @@ public class StopServiceImpl implements StopService {
         dto.setRouteId(stop.getRouteId());
         dto.setStationId(stop.getStationId());
         dto.setSeq(stop.getSeq());
-        dto.setArrivalTime(stop.getArrivalTime());
-        dto.setDepartureTime(stop.getDepartureTime());
         
         // 获取路线名称
         if (stop.getRoute() != null) {

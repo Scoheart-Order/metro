@@ -1,7 +1,6 @@
 package com.scoding.metro.dto;
 
 import lombok.Data;
-import java.time.LocalTime;
 
 /**
  * 停靠点数据传输对象
@@ -39,14 +38,4 @@ public class StopDto {
      * 在路线中的顺序
      */
     private Integer seq;
-    
-    /**
-     * 到达时间
-     */
-    private LocalTime arrivalTime;
-    
-    /**
-     * 出发时间
-     */
-    private LocalTime departureTime;
 } 

@@ -291,13 +291,22 @@ const rules = {
 // 生命周期钩子
 onMounted(async () => {
   loading.value = true;
-  // 并行加载数据提高效率
-  await Promise.all([
-    metroStore.fetchLines(),
-    metroStore.fetchRoutes(),
-    metroStore.fetchTrainTrips(),
-  ]);
-  loading.value = false;
+  
+  try {
+    // 先加载线路数据
+    await metroStore.fetchLines();
+    
+    // 然后加载路线数据，确保所有线路的路线都被加载
+    await metroStore.fetchRoutes();
+    
+    // 最后加载行程数据
+    await metroStore.fetchTrainTrips();
+  } catch (error) {
+    console.error('加载数据失败:', error);
+    ElMessage.error('加载数据失败');
+  } finally {
+    loading.value = false;
+  }
 });
 
 // 监听线路过滤器变化
@@ -309,24 +318,30 @@ watch(lineFilter, async (newValue) => {
 });
 
 // 辅助方法
-const getLineColor = (lineId: number) => {
+const getLineColor = (lineId: number | null) => {
+  if (lineId === null) return '#909399';
   const line = metroStore.lines.find((l) => l.id === lineId);
   return line ? line.color : '#909399';
 };
 
-const getLineName = (lineId: number) => {
+const getLineName = (lineId: number | null) => {
+  if (lineId === null) return '未知线路';
   const line = metroStore.lines.find((l) => l.id === lineId);
-  return line ? line.name : '';
+  return line ? line.name : '未知线路';
 };
 
 const getRouteName = (routeId: number) => {
   const route = metroStore.routes.find((r) => r.id === routeId);
-  return route ? route.name : '';
+  return route ? route.name : '未知方向';
 };
 
 const getRouteLineId = (routeId: number) => {
   const route = metroStore.routes.find((r) => r.id === routeId);
-  return route ? route.lineId : 0;
+  if (!route) {
+    console.warn(`未找到ID为${routeId}的路线`);
+    return null;
+  }
+  return route.lineId;
 };
 
 const formatDate = (dateStr: string) => {

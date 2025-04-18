@@ -115,14 +115,9 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="顺序" prop="seq">
-          <el-input-number
-            v-model="stopForm.seq"
-            :min="1"
-            :max="routeStops.length + (isEditMode ? 0 : 1)"
-            style="width: 100%"
-          />
-        </el-form-item>
+        <div v-if="isEditMode" class="seq-info">
+          当前序号: {{ stopForm.seq }}
+        </div>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -167,7 +162,6 @@ const stopForm = ref<StopDto>({
 });
 const stopRules = {
   stationId: [{ required: true, message: '请选择站点', trigger: 'change' }],
-  seq: [{ required: true, message: '请输入顺序', trigger: 'change' }],
 };
 const stopFormRef = ref<FormInstance | null>(null);
 
@@ -288,14 +282,15 @@ const handleDeleteStop = (row: StopDisplay) => {
     .then(async () => {
       try {
         stopsLoading.value = true;
+        
+        // 先删除停靠点
         await metroApi.deleteStop(row.id);
+        
+        // 从前端数组中移除已删除的停靠点
         routeStops.value = routeStops.value.filter(stop => stop.id !== row.id);
         
-        // 重新排序
-        let seq = 1;
-        for (const stop of routeStops.value.sort((a, b) => a.seq - b.seq)) {
-          stop.seq = seq++;
-        }
+        // 重新排序并更新后端
+        await updateStopSequences();
         
         ElMessage.success('停靠点删除成功');
       } catch (error) {
@@ -308,6 +303,44 @@ const handleDeleteStop = (row: StopDisplay) => {
     .catch(() => {
       // 取消删除操作
     });
+};
+
+// 添加一个新方法用于更新停靠点序号
+const updateStopSequences = async () => {
+  try {
+    // 先对停靠点进行排序
+    routeStops.value.sort((a, b) => a.seq - b.seq);
+    
+    // 更新序号
+    const updatePromises = routeStops.value.map((stop, index) => {
+      const newSeq = index + 1;
+      
+      // 只有当序号变化时才更新
+      if (stop.seq !== newSeq) {
+        stop.seq = newSeq;
+        
+        // 创建更新对象
+        const updateData = {
+          id: stop.id,
+          routeId: stop.routeId,
+          stationId: stop.stationId,
+          seq: newSeq
+        };
+        
+        // 返回更新操作的Promise
+        return metroApi.updateStop(stop.id, updateData);
+      }
+      
+      // 如果序号没变，返回一个已解决的Promise
+      return Promise.resolve();
+    });
+    
+    // 等待所有更新完成
+    await Promise.all(updatePromises);
+  } catch (error) {
+    console.error('更新停靠点序号失败', error);
+    ElMessage.error('更新停靠点序号失败');
+  }
 };
 
 // 提交添加停靠点表单
@@ -334,6 +367,7 @@ const submitStopForm = async () => {
           let newStop;
           
           if (isEditMode.value && formattedData.id) {
+            // 编辑模式 - 保持原有序号
             newStop = await metroApi.updateStop(formattedData.id, formattedData);
             
             const index = routeStops.value.findIndex(stop => stop.id === formattedData.id);
@@ -347,6 +381,8 @@ const submitStopForm = async () => {
             
             ElMessage.success('停靠点更新成功');
           } else {
+            // 添加模式 - 自动设置为最后一个序号
+            formattedData.seq = routeStops.value.length + 1;
             newStop = await metroApi.createStop(formattedData);
             
             const newStopData: StopDisplay = {
@@ -359,6 +395,7 @@ const submitStopForm = async () => {
             ElMessage.success('停靠点添加成功');
           }
           
+          // 重新排序显示
           routeStops.value.sort((a, b) => a.seq - b.seq);
           addStopDialogVisible.value = false;
         } catch (error) {
@@ -489,5 +526,14 @@ const handleEditStop = (row: StopDisplay) => {
 
 .action-btn {
   padding: 6px 12px;
+}
+
+.seq-info {
+  margin: 15px 0;
+  padding: 10px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  color: #606266;
+  font-size: 14px;
 }
 </style>
