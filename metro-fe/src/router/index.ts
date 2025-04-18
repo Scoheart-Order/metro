@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import { useUserStore } from '../stores/user';
 import { ElMessage } from 'element-plus';
+import { ROLE_NAMES } from '../constants/roles';
 
 // 定义路由元数据类型
 interface CustomRouteMeta {
@@ -78,7 +79,7 @@ const routes = [
     component: () => import('../views/admin/AdminLayout.vue'),
     meta: {
       requiresAuth: true,
-      requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+      requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
       title: '管理后台',
     },
     children: [
@@ -88,7 +89,7 @@ const routes = [
         component: () => import('../views/admin/AdminHome.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '管理首页',
         },
       },
@@ -98,7 +99,7 @@ const routes = [
         component: () => import('../views/admin/TrainManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '车次管理',
         },
       },
@@ -108,7 +109,7 @@ const routes = [
         component: () => import('../views/admin/LineManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '线路管理',
         },
       },
@@ -118,7 +119,7 @@ const routes = [
         component: () => import('../views/admin/StationManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '站点管理',
         },
       },
@@ -128,7 +129,7 @@ const routes = [
         component: () => import('../views/admin/RouteManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '路线管理',
         },
       },
@@ -138,7 +139,7 @@ const routes = [
         component: () => import('../views/admin/StopManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '停站管理',
         },
       },
@@ -148,7 +149,7 @@ const routes = [
         component: () => import('../views/admin/FeedbackManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '反馈管理',
         },
       },
@@ -158,7 +159,7 @@ const routes = [
         component: () => import('../views/admin/RequestManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '需求管理',
         },
       },
@@ -168,7 +169,7 @@ const routes = [
         component: () => import('../views/admin/AnnouncementManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['ADMIN', 'SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
           title: '公告管理',
         },
       },
@@ -181,7 +182,7 @@ const routes = [
     component: () => import('../views/superadmin/SuperAdminLayout.vue'),
     meta: {
       requiresAuth: true,
-      requiredRoles: ['SUPER_ADMIN'],
+      requiredRoles: [ROLE_NAMES.SUPER_ADMIN],
       title: '超级管理后台',
     },
     children: [
@@ -189,7 +190,7 @@ const routes = [
         path: '',
         name: 'SuperAdminHome',
         redirect: '/superadmin/user-management',
-        meta: { requiresAuth: true, requiredRoles: ['SUPER_ADMIN'] },
+        meta: { requiresAuth: true, requiredRoles: [ROLE_NAMES.SUPER_ADMIN] },
       },
       {
         path: 'user-management',
@@ -197,7 +198,7 @@ const routes = [
         component: () => import('../views/superadmin/UserManagement.vue'),
         meta: {
           requiresAuth: true,
-          requiredRoles: ['SUPER_ADMIN'],
+          requiredRoles: [ROLE_NAMES.SUPER_ADMIN],
           title: '用户管理',
         },
       },
@@ -216,12 +217,6 @@ const routes = [
     name: 'Register',
     component: () => import('../views/auth/Register.vue'),
     meta: { requiresAuth: false, title: '注册' },
-  },
-  {
-    path: '/reset-password',
-    name: 'ResetPassword',
-    component: () => import('../views/auth/ResetPassword.vue'),
-    meta: { requiresAuth: false, title: '重置密码' },
   },
 
   // 根路径重定向到metro

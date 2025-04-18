@@ -39,7 +39,6 @@
         
         <div class="form-actions">
           <el-checkbox v-model="rememberMe">记住我</el-checkbox>
-          <el-link type="primary" @click="$router.push('/reset-password')">忘记密码？</el-link>
         </div>
         
         <el-form-item>

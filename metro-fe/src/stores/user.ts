@@ -62,7 +62,8 @@ export const useUserStore = defineStore('user', {
         return true
       } catch (error) {
         console.error('Login error:', error)
-        return false
+        // 不返回false，而是抛出错误，让调用者处理
+        throw error
       }
     },
     
@@ -80,7 +81,8 @@ export const useUserStore = defineStore('user', {
         return true
       } catch (error) {
         console.error('Login by phone error:', error)
-        return false
+        // 不返回false，而是抛出错误，让调用者处理
+        throw error
       }
     },
     
@@ -90,19 +92,6 @@ export const useUserStore = defineStore('user', {
         return { success: true }
       } catch (error) {
         console.error('Register error:', error)
-        return { success: false, error }
-      }
-    },
-    
-    async resetPassword(email: string, code: string, newPassword: string) {
-      try {
-        // Note: This endpoint isn't in our current API setup,
-        // so this would need to be implemented in the backend
-        // and then updated here
-        // const response = await authApi.resetPassword(email, code, newPassword)
-        return { success: false, error: 'Not implemented' }
-      } catch (error) {
-        console.error('Password reset error:', error)
         return { success: false, error }
       }
     },
