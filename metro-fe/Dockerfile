@@ -13,6 +13,9 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
+# Set environment to use Docker configuration
+ENV VITE_DOCKER_ENV=true
+
 # Expose development server port
 EXPOSE 3333
 

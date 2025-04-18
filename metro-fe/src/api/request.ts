@@ -10,9 +10,17 @@ export interface ApiResponse<T = any> {
   success: boolean;
 }
 
+// Determine if we're in a Docker environment (this can be set in your Docker container)
+const isDocker = import.meta.env.VITE_DOCKER_ENV === 'true';
+
+// Choose the appropriate base URL
+const apiBaseUrl = isDocker 
+  ? import.meta.env.VITE_API_BASE_URL_DOCKER 
+  : import.meta.env.VITE_API_BASE_URL;
+
 // Create axios instance
 const service = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  baseURL: apiBaseUrl || 'http://localhost:8080/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
