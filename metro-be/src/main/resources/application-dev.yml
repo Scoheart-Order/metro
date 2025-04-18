@@ -5,9 +5,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://8.130.172.82:3306/demo
-    username: root
-    password: root888
+    url: jdbc:mysql://8.130.172.82:3306/metro
+    username: metro
+    password: metro
     driver-class-name: com.mysql.cj.jdbc.Driver
   security:
     user:

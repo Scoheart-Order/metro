@@ -1,5 +1,5 @@
 # Build stage
-FROM node:16 AS build
+FROM node:22 AS build
 
 # 配置 NPM 缓存目录
 ARG NPM_CONFIG_CACHE
