@@ -1,10 +1,7 @@
 # Build stage
 FROM node:22 AS build
 
-# 配置 NPM 缓存目录
-ARG NPM_CONFIG_CACHE
-ENV NPM_CONFIG_CACHE=$NPM_CONFIG_CACHE
-
+# Set working directory
 WORKDIR /app
 
 # Configure NPM to use Taobao registry
@@ -28,6 +25,9 @@ COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+# Create directories to ensure they exist
+RUN mkdir -p /usr/share/nginx/html/assets
 
 # Expose port
 EXPOSE 80
