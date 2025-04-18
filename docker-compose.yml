@@ -19,10 +19,10 @@ services:
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "metro", "-pmetro"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 15s
     networks:
       - metro-network
 
@@ -46,10 +46,10 @@ services:
       SPRING_DATASOURCE_PASSWORD: metro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/api"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 40s
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 20s
     volumes:
       - maven-repo:/root/.m2/repository
     networks:
