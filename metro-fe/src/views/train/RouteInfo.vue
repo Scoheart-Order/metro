@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="page-header">
-          <h2>路线信息</h2>
+          <h2>列车线路信息</h2>
         </div>
       </template>
 

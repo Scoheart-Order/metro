@@ -18,8 +18,6 @@ public interface StopMapper {
     
     Stop getStopByRouteAndStation(Long routeId, Long stationId);
     
-    List<Stop> getAllTransferStops();
-    
     int insertStop(Stop stop);
     
     int updateStop(Stop stop);

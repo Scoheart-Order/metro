@@ -3,7 +3,7 @@
     <el-card>
       <template #header>
         <div class="page-header">
-          <h2>停靠点时刻查询</h2>
+          <h2>到站发车时刻</h2>
         </div>
       </template>
       

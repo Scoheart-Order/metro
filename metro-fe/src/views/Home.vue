@@ -15,27 +15,6 @@
           <el-card shadow="hover" class="info-card">
             <template #header>
               <div class="card-header">
-                <i class="el-icon-time"></i>
-                <span>到站发车时刻</span>
-              </div>
-            </template>
-            <div class="card-content">
-              <p>查询各站点的列车到站与发车时刻表，帮助您合理安排出行时间</p>
-              <el-button
-                type="primary"
-                plain
-                @click="$router.push('/train-info')"
-              >
-                查看列车时刻
-              </el-button>
-            </div>
-          </el-card>
-        </el-col>
-
-        <el-col :xs="24" :sm="8">
-          <el-card shadow="hover" class="info-card">
-            <template #header>
-              <div class="card-header">
                 <i class="el-icon-map-location"></i>
                 <span>列车线路信息</span>
               </div>
@@ -48,6 +27,27 @@
                 @click="$router.push('/route-info')"
               >
                 查看线路地图
+              </el-button>
+            </div>
+          </el-card>
+        </el-col>
+
+        <el-col :xs="24" :sm="8">
+          <el-card shadow="hover" class="info-card">
+            <template #header>
+              <div class="card-header">
+                <i class="el-icon-time"></i>
+                <span>到站发车时刻</span>
+              </div>
+            </template>
+            <div class="card-content">
+              <p>查询各站点的列车到站与发车时刻表，帮助您合理安排出行时间</p>
+              <el-button
+                type="primary"
+                plain
+                @click="$router.push('/train-info')"
+              >
+                查看列车时刻
               </el-button>
             </div>
           </el-card>

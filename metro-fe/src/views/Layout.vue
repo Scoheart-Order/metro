@@ -16,8 +16,8 @@
               <el-menu-item index="/">首页</el-menu-item>
               <el-sub-menu index="/train">
                 <template #title>地铁信息</template>
-                <el-menu-item index="/train-info">时刻查询</el-menu-item>
                 <el-menu-item index="/route-info">线路查询</el-menu-item>
+                <el-menu-item index="/train-info">时刻查询</el-menu-item>
               </el-sub-menu>
               <el-sub-menu index="/feedback">
                 <template #title>评价与需求</template>

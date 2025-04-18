@@ -25,18 +25,15 @@
         SELECT * FROM stop WHERE route_id = #{routeId} AND station_id = #{stationId}
     </select>
 
-    <select id="getAllTransferStops" resultType="com.scoding.metro.entity.Stop">
-        SELECT * FROM stop WHERE is_transfer = true
-    </select>
-
     <insert id="insertStop" parameterType="com.scoding.metro.entity.Stop" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO stop(route_id, station_id, seq, is_transfer)
-        VALUES(#{routeId}, #{stationId}, #{seq}, #{isTransfer})
+        INSERT INTO stop(route_id, station_id, seq, arrival_time, departure_time)
+        VALUES(#{routeId}, #{stationId}, #{seq}, #{arrivalTime}, #{departureTime})
     </insert>
 
     <update id="updateStop" parameterType="com.scoding.metro.entity.Stop">
         UPDATE stop SET route_id = #{routeId}, station_id = #{stationId},
-        seq = #{seq}, is_transfer = #{isTransfer} WHERE id = #{id}
+        seq = #{seq}, arrival_time = #{arrivalTime}, departure_time = #{departureTime} 
+        WHERE id = #{id}
     </update>
 
     <delete id="deleteStop" parameterType="java.lang.Long">
