@@ -93,3 +93,41 @@ metro-fe/
 - 拥有普通管理员的所有权限
 - 管理普通管理员账户
 - 配置系统权限
+
+## Docker Deployment
+
+### Building the Docker Image
+
+To build the Docker image:
+
+```bash
+docker build -t metro-fe .
+```
+
+### Running the Container
+
+To run the container:
+
+```bash
+# Run with port mapping
+docker run -d -p 3333:3333 --name metro-frontend metro-fe
+
+# If you need to connect to a backend service, use network settings
+# docker run -d -p 3333:3333 --network metro-network --name metro-frontend metro-fe
+```
+
+### Accessing the Application
+
+The application will be available at:
+
+```
+http://localhost:3333
+```
+
+Or on your server:
+
+```
+http://YOUR_SERVER_IP:3333
+```
+
+## Development
