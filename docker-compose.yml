@@ -33,6 +33,6 @@ services:
       context: ./metro-fe
     restart: always
     ports:
-      - '80:80'
+      - '3333:3333'
     depends_on:
       - metro-be

@@ -30,6 +30,6 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 RUN mkdir -p /usr/share/nginx/html/assets
 
 # Expose port
-EXPOSE 80
+EXPOSE 3333
 
 CMD ["nginx", "-g", "daemon off;"] 
