@@ -173,6 +173,26 @@ const routes = [
           title: '公告管理',
         },
       },
+      {
+        path: 'train-trip-management',
+        name: 'TrainTripManagement',
+        component: () => import('../views/admin/TrainTripManagement.vue'),
+        meta: {
+          requiresAuth: true,
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
+          title: '列车行程管理',
+        },
+      },
+      {
+        path: 'stop-time-management/:id',
+        name: 'StopTimeManagement',
+        component: () => import('../views/admin/StopTimeManagement.vue'),
+        meta: {
+          requiresAuth: true,
+          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
+          title: '时刻表管理',
+        },
+      },
     ],
   },
 

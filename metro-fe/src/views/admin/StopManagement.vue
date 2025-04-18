@@ -53,35 +53,36 @@
           </el-button>
         </div>
 
-        <div class="stops-list" v-loading="stopsLoading">
+        <div class="stops-timeline" v-loading="stopsLoading">
           <el-empty v-if="routeStops.length === 0" description="暂无停靠点" />
-          <el-card v-for="stop in routeStops" :key="stop.id" class="stop-item">
-            <div class="stop-info">
-              <div class="stop-seq">{{ stop.seq }}</div>
-              <div class="stop-content">
-                <div class="stop-name">{{ stop.stationName }}</div>
-                <div class="stop-code">{{ stop.stationCode }}</div>
-                <div class="stop-time">
-                  <div class="time-item">
-                    <span class="time-label">到站时间:</span>
-                    <span class="time-value">{{ stop.arrivalTime || '未设置' }}</span>
+          
+          <el-timeline v-else>
+            <el-timeline-item
+              v-for="stop in routeStops"
+              :key="stop.id"
+              :timestamp="getStationDetails(stop)"
+              :type="getTimelineItemType(stop.seq)"
+              :color="getTimelineItemColor(stop.seq)"
+            >
+              <div class="timeline-content">
+                <div class="timeline-header">
+                  <div class="station-info">
+                    <span class="station-seq">{{ stop.seq }}</span>
+                    <span class="station-name">{{ stop.stationName }}</span>
+                    <span class="station-code">({{ stop.stationCode }})</span>
                   </div>
-                  <div class="time-item">
-                    <span class="time-label">发车时间:</span>
-                    <span class="time-value">{{ stop.departureTime || '未设置' }}</span>
+                  <div class="stop-actions">
+                    <el-button type="primary" size="small" @click="handleEditStop(stop)" class="action-btn">
+                      编辑
+                    </el-button>
+                    <el-button type="danger" size="small" @click="handleDeleteStop(stop)" class="action-btn">
+                      删除
+                    </el-button>
                   </div>
                 </div>
               </div>
-              <div class="stop-actions">
-                <el-button type="primary" size="small" @click="handleEditStop(stop)" class="action-btn">
-                  编辑
-                </el-button>
-                <el-button type="danger" size="small" @click="handleDeleteStop(stop)" class="action-btn">
-                  删除
-                </el-button>
-              </div>
-            </div>
-          </el-card>
+            </el-timeline-item>
+          </el-timeline>
         </div>
       </div>
     </el-dialog>
@@ -122,22 +123,6 @@
             style="width: 100%"
           />
         </el-form-item>
-        <el-form-item label="到站时间" prop="arrivalTime">
-          <el-time-picker
-            v-model="stopForm.arrivalTime"
-            format="HH:mm"
-            placeholder="选择到站时间"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="发车时间" prop="departureTime">
-          <el-time-picker
-            v-model="stopForm.departureTime"
-            format="HH:mm"
-            placeholder="选择发车时间"
-            style="width: 100%"
-          />
-        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -161,6 +146,7 @@ import type { Route, Stop, StopDto } from '../../api/modules/metro';
 // 定义组件内部使用的Stop接口，包含额外字段
 interface StopDisplay extends Stop {
   stationCode: string;
+  stationName: string;
 }
 
 // 基础数据
@@ -177,9 +163,7 @@ const isEditMode = ref(false);
 const stopForm = ref<StopDto>({
   routeId: 0,
   stationId: 0,
-  seq: 1,
-  arrivalTime: null,
-  departureTime: null,
+  seq: 1
 });
 const stopRules = {
   stationId: [{ required: true, message: '请选择站点', trigger: 'change' }],
@@ -191,14 +175,10 @@ const stopFormRef = ref<FormInstance | null>(null);
 const availableStations = computed(() => {
   if (!selectedRoute.value) return [];
   
-  // 获取所有站点
   const allStations = metroStore.stations;
-  
-  // 获取当前方向的起始站和终点站ID
   const startStationId = selectedRoute.value.startStationId;
   const endStationId = selectedRoute.value.endStationId;
   
-  // 过滤掉已经添加到当前方向的站点，以及起始站和终点站
   return allStations.filter(
     (station) => !routeStops.value.some(stop => stop.stationId === station.id) && 
               station.id !== startStationId && 
@@ -209,7 +189,6 @@ const availableStations = computed(() => {
 // 生命周期钩子
 onMounted(async () => {
   loading.value = true;
-  // 并行加载数据提高效率
   await Promise.all([
     metroStore.fetchLines(),
     metroStore.fetchStations(),
@@ -236,16 +215,30 @@ const getStationName = (stationId: number) => {
   return station ? station.name : '';
 };
 
+// 获取站点详情
+const getStationDetails = (stop: StopDisplay) => {
+  return `站点编码: ${stop.stationCode}`;
+};
+
+// 获取时间线项类型
+const getTimelineItemType = (seq: number) => {
+  const types = ['primary', 'success', 'warning', 'danger'];
+  return types[seq % types.length];
+};
+
+// 获取时间线项颜色
+const getTimelineItemColor = (seq: number) => {
+  const colors = ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C', '#909399'];
+  return colors[seq % colors.length];
+};
+
 // 加载方向的停靠点
 const fetchRouteStops = async (routeId: number) => {
   stopsLoading.value = true;
   try {
-    // 使用metroApi获取方向的停靠点
     const stops = await metroApi.getStopsByRouteId(routeId);
 
-    // 转换为组件内部使用的格式
     routeStops.value = stops.map((stop) => {
-      // 获取站点信息
       const station = metroStore.getStationById(stop.stationId);
 
       return {
@@ -255,7 +248,6 @@ const fetchRouteStops = async (routeId: number) => {
       };
     });
 
-    // 按顺序排序
     routeStops.value.sort((a, b) => a.seq - b.seq);
   } catch (error) {
     console.error('获取停靠点数据失败', error);
@@ -280,9 +272,7 @@ const openAddStopDialog = () => {
     id: null,
     routeId: selectedRoute.value.id,
     stationId: 0,
-    seq: routeStops.value.length + 1,
-    arrivalTime: null,
-    departureTime: null,
+    seq: routeStops.value.length + 1
   };
   isEditMode.value = false;
   addStopDialogVisible.value = true;
@@ -298,17 +288,14 @@ const handleDeleteStop = (row: StopDisplay) => {
     .then(async () => {
       try {
         stopsLoading.value = true;
-        
-        // 使用metroApi删除停靠点
         await metroApi.deleteStop(row.id);
-        
-        // 从本地数据中删除
         routeStops.value = routeStops.value.filter(stop => stop.id !== row.id);
         
         // 重新排序
-        routeStops.value.forEach((stop, index) => {
-          stop.seq = index + 1;
-        });
+        let seq = 1;
+        for (const stop of routeStops.value.sort((a, b) => a.seq - b.seq)) {
+          stop.seq = seq++;
+        }
         
         ElMessage.success('停靠点删除成功');
       } catch (error) {
@@ -331,8 +318,6 @@ const submitStopForm = async () => {
     await stopFormRef.value.validate(async (valid: boolean) => {
       if (valid) {
         stopsLoading.value = true;
-        
-        // 查找选择的站点信息
         const station = metroStore.getStationById(stopForm.value.stationId);
         
         if (!station) {
@@ -342,20 +327,15 @@ const submitStopForm = async () => {
         }
 
         try {
-          // 格式化时间为HH:mm格式
           const formattedData = {
-            ...stopForm.value,
-            arrivalTime: stopForm.value.arrivalTime ? formatTime(stopForm.value.arrivalTime) : null,
-            departureTime: stopForm.value.departureTime ? formatTime(stopForm.value.departureTime) : null,
+            ...stopForm.value
           };
           
           let newStop;
           
           if (isEditMode.value && formattedData.id) {
-            // 使用metroApi更新停靠点
             newStop = await metroApi.updateStop(formattedData.id, formattedData);
             
-            // 更新本地数据
             const index = routeStops.value.findIndex(stop => stop.id === formattedData.id);
             if (index !== -1) {
               routeStops.value[index] = {
@@ -367,10 +347,8 @@ const submitStopForm = async () => {
             
             ElMessage.success('停靠点更新成功');
           } else {
-            // 使用metroApi创建新停靠点
             newStop = await metroApi.createStop(formattedData);
             
-            // 添加到本地数据
             const newStopData: StopDisplay = {
               ...newStop,
               stationName: station.name,
@@ -381,7 +359,6 @@ const submitStopForm = async () => {
             ElMessage.success('停靠点添加成功');
           }
           
-          // 重新排序
           routeStops.value.sort((a, b) => a.seq - b.seq);
           addStopDialogVisible.value = false;
         } catch (error) {
@@ -400,26 +377,6 @@ const submitStopForm = async () => {
   }
 };
 
-// 辅助函数 - 格式化时间为HH:mm格式
-const formatTime = (time: any): string => {
-  if (!time) return '';
-  
-  if (typeof time === 'string') {
-    // 如果已经是格式化的字符串，直接返回
-    if (time.match(/^\d{2}:\d{2}$/)) return time;
-    
-    // 尝试解析ISO格式的日期字符串
-    const date = new Date(time);
-    if (!isNaN(date.getTime())) {
-      return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
-    }
-  } else if (time instanceof Date) {
-    return `${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}`;
-  }
-  
-  return '';
-};
-
 // 打开编辑停靠点对话框
 const handleEditStop = (row: StopDisplay) => {
   if (!selectedRoute.value) return;
@@ -428,9 +385,7 @@ const handleEditStop = (row: StopDisplay) => {
     id: row.id,
     routeId: selectedRoute.value.id,
     stationId: row.stationId,
-    seq: row.seq,
-    arrivalTime: row.arrivalTime,
-    departureTime: row.departureTime,
+    seq: row.seq
   };
   isEditMode.value = true;
   addStopDialogVisible.value = true;
@@ -472,6 +427,7 @@ const handleEditStop = (row: StopDisplay) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
 }
 
 .stops-header h3 {
@@ -480,91 +436,58 @@ const handleEditStop = (row: StopDisplay) => {
   color: #303133;
 }
 
-.stops-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.stops-timeline {
   max-height: 60vh;
   overflow-y: auto;
+  padding: 0 10px;
 }
 
-.stop-item {
-  margin-bottom: 10px;
+.timeline-content {
+  padding: 10px;
+  background-color: #f7f7f7;
+  border-radius: 4px;
 }
 
-.stop-info {
+.timeline-header {
   display: flex;
+  justify-content: space-between;
   align-items: center;
 }
 
-.stop-seq {
+.station-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.station-seq {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 36px;
-  height: 36px;
+  width: 28px;
+  height: 28px;
   background-color: #409EFF;
   color: white;
   border-radius: 50%;
   font-weight: bold;
-  margin-right: 16px;
 }
 
-.stop-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.stop-name {
+.station-name {
   font-size: 16px;
   font-weight: bold;
-  margin-bottom: 4px;
 }
 
-.stop-code {
+.station-code {
   font-size: 12px;
   color: #909399;
-  margin-bottom: 4px;
-}
-
-.stop-time {
-  margin-top: 8px;
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.time-item {
-  display: flex;
-  flex-direction: column;
-  background-color: #f5f7fa;
-  border-radius: 4px;
-  padding: 4px 8px;
-  min-width: 120px;
-}
-
-.time-label {
-  font-size: 12px;
-  color: #909399;
-  margin-bottom: 2px;
-}
-
-.time-value {
-  font-size: 14px;
-  color: #303133;
-  font-weight: 500;
 }
 
 .stop-actions {
-  margin-left: auto;
-}
-
-.tag-item {
-  margin-top: 8px;
+  display: flex;
+  gap: 8px;
 }
 
 .action-btn {
-  margin-left: 8px;
+  padding: 6px 12px;
 }
 </style>

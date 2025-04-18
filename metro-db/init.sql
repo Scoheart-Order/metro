@@ -1,3 +1,6 @@
+-- 删除现有数据库（如果存在）
+DROP DATABASE IF EXISTS metro;
+
 CREATE DATABASE IF NOT EXISTS metro;
 USE metro;
 
@@ -102,15 +105,11 @@ CREATE TABLE IF NOT EXISTS route (
     end_station_id BIGINT COMMENT '终点站点ID'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 路线停靠站点表
 CREATE TABLE IF NOT EXISTS stop (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     route_id BIGINT NOT NULL COMMENT '所属路线ID',
     station_id BIGINT NOT NULL COMMENT '站点ID',
-    seq INT NOT NULL COMMENT '序号',
-    is_transfer BOOLEAN DEFAULT FALSE COMMENT '是否为换乘站',
-    UNIQUE KEY (route_id, station_id) COMMENT '一条路线上一个站点只能出现一次',
-    UNIQUE KEY (route_id, seq) COMMENT '同一路线上序号不能重复'
+    seq INT NOT NULL COMMENT '序号'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 列车行程表
@@ -118,7 +117,7 @@ CREATE TABLE IF NOT EXISTS train_trip (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     route_id BIGINT NOT NULL COMMENT '所属路线ID',
     train_number VARCHAR(20) NOT NULL COMMENT '列车车次号',
-    run_date DATE NOT NULL COMMENT '运行日期',
+    run_date DATE NOT NULL COMMENT '运行日期'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 到站时刻表
@@ -128,5 +127,5 @@ CREATE TABLE IF NOT EXISTS stop_time (
     stop_id BIGINT NOT NULL COMMENT '所属停靠点ID',
     arrival_time TIME COMMENT '到达时间',
     departure_time TIME COMMENT '离开时间',
-    stop_seq INT COMMENT '在当前行程中的顺序',
+    stop_seq INT COMMENT '在当前行程中的顺序'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -43,12 +43,17 @@
                   >方向管理</el-menu-item
                 >
                 <el-menu-item index="/admin/stop-management"
-                  >停靠点管理</el-menu-item
+                  >停站管理</el-menu-item
                 >
               </el-sub-menu>
-              <el-menu-item index="/admin/schedule-management"
-                >时刻管理</el-menu-item
-              >
+              <el-sub-menu index="/admin/schedule">
+                <template #title>
+                  <span>列车行程管理</span>
+                </template>
+                <el-menu-item index="/admin/train-trip-management"
+                  >列车行程</el-menu-item
+                >
+              </el-sub-menu>
             </el-sub-menu>
 
             <el-sub-menu index="/admin/feedback">

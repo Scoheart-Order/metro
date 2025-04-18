@@ -5,10 +5,14 @@ import com.scoding.metro.dto.LineDto;
 import com.scoding.metro.dto.RouteDto;
 import com.scoding.metro.dto.StationDto;
 import com.scoding.metro.dto.StopDto;
+import com.scoding.metro.dto.TrainTripDto;
+import com.scoding.metro.dto.StopTimeDto;
 import com.scoding.metro.service.LineService;
 import com.scoding.metro.service.RouteService;
 import com.scoding.metro.service.StationService;
 import com.scoding.metro.service.StopService;
+import com.scoding.metro.service.TrainTripService;
+import com.scoding.metro.service.StopTimeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,6 +27,8 @@ public class MetroController {
     private final StationService stationService;
     private final RouteService routeService;
     private final StopService stopService;
+    private final TrainTripService trainTripService;
+    private final StopTimeService stopTimeService;
     
     // 线路相关接口
     @GetMapping("/lines")
@@ -172,5 +178,77 @@ public class MetroController {
     @DeleteMapping("/stops/{id}")
     public R<Boolean> deleteStop(@PathVariable Long id) {
         return R.ok(stopService.deleteStop(id));
+    }
+    
+    // 列车行程相关接口
+    @GetMapping("/train-trips")
+    public R<List<TrainTripDto>> getAllTrainTrips() {
+        return R.ok(trainTripService.getAllTrainTrips());
+    }
+    
+    @GetMapping("/train-trips/{id}")
+    public R<TrainTripDto> getTrainTripById(@PathVariable Long id) {
+        return R.ok(trainTripService.getTrainTripById(id));
+    }
+    
+    @GetMapping("/train-trips/route/{routeId}")
+    public R<List<TrainTripDto>> getTrainTripsByRouteId(@PathVariable Long routeId) {
+        return R.ok(trainTripService.getTrainTripsByRouteId(routeId));
+    }
+    
+    @GetMapping("/train-trips/{id}/stop-times")
+    public R<TrainTripDto> getTrainTripWithStopTimes(@PathVariable Long id) {
+        return R.ok(trainTripService.getTrainTripWithStopTimes(id));
+    }
+    
+    @PostMapping("/train-trips")
+    public R<TrainTripDto> createTrainTrip(@RequestBody TrainTripDto trainTripDto) {
+        return R.ok(trainTripService.createTrainTrip(trainTripDto));
+    }
+    
+    @PutMapping("/train-trips/{id}")
+    public R<TrainTripDto> updateTrainTrip(@PathVariable Long id, @RequestBody TrainTripDto trainTripDto) {
+        return R.ok(trainTripService.updateTrainTrip(id, trainTripDto));
+    }
+    
+    @DeleteMapping("/train-trips/{id}")
+    public R<Boolean> deleteTrainTrip(@PathVariable Long id) {
+        return R.ok(trainTripService.deleteTrainTrip(id));
+    }
+    
+    // 到站时刻相关接口
+    @GetMapping("/stop-times")
+    public R<List<StopTimeDto>> getAllStopTimes() {
+        return R.ok(stopTimeService.getAllStopTimes());
+    }
+    
+    @GetMapping("/stop-times/{id}")
+    public R<StopTimeDto> getStopTimeById(@PathVariable Long id) {
+        return R.ok(stopTimeService.getStopTimeById(id));
+    }
+    
+    @GetMapping("/stop-times/train-trip/{trainTripId}")
+    public R<List<StopTimeDto>> getStopTimesByTrainTripId(@PathVariable Long trainTripId) {
+        return R.ok(stopTimeService.getStopTimesByTrainTripId(trainTripId));
+    }
+    
+    @GetMapping("/stop-times/stop/{stopId}")
+    public R<List<StopTimeDto>> getStopTimesByStopId(@PathVariable Long stopId) {
+        return R.ok(stopTimeService.getStopTimesByStopId(stopId));
+    }
+    
+    @PostMapping("/stop-times")
+    public R<StopTimeDto> createStopTime(@RequestBody StopTimeDto stopTimeDto) {
+        return R.ok(stopTimeService.createStopTime(stopTimeDto));
+    }
+    
+    @PutMapping("/stop-times/{id}")
+    public R<StopTimeDto> updateStopTime(@PathVariable Long id, @RequestBody StopTimeDto stopTimeDto) {
+        return R.ok(stopTimeService.updateStopTime(id, stopTimeDto));
+    }
+    
+    @DeleteMapping("/stop-times/{id}")
+    public R<Boolean> deleteStopTime(@PathVariable Long id) {
+        return R.ok(stopTimeService.deleteStopTime(id));
     }
 } 

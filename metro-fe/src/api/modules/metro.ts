@@ -55,13 +55,43 @@ export interface StopDto {
   routeId: number
   stationId: number
   seq: number
-  arrivalTime?: string | null
-  departureTime?: string | null
 }
 
 export interface Stop extends StopDto {
   id: number
   routeName?: string
+  stationName?: string
+}
+
+// TrainTrip interfaces
+export interface TrainTripDto {
+  id?: number | null
+  routeId: number
+  trainNumber: string
+  runDate: string
+  stopTimeIds?: number[]
+}
+
+export interface TrainTrip extends TrainTripDto {
+  id: number
+  route?: Route
+  stopTimes?: StopTime[]
+}
+
+// StopTime interfaces
+export interface StopTimeDto {
+  id?: number | null
+  trainTripId: number
+  stopId: number
+  arrivalTime?: string | null
+  departureTime?: string | null
+  stopSeq: number
+}
+
+export interface StopTime extends StopTimeDto {
+  id: number
+  trainTrip?: TrainTrip
+  stop?: Stop
   stationName?: string
 }
 
@@ -203,5 +233,69 @@ export const metroApi = {
 
   deleteStop: (id: number) => {
     return request.delete<boolean>(`/metro/stops/${id}`)
+  },
+
+  // TrainTrip methods
+  getAllTrainTrips: () => {
+    return request.get<TrainTrip[]>('/metro/train-trips')
+  },
+
+  getTrainTripById: (id: number) => {
+    return request.get<TrainTrip>(`/metro/train-trips/${id}`)
+  },
+
+  getTrainTripsByRouteId: (routeId: number) => {
+    return request.get<TrainTrip[]>(`/metro/train-trips/route/${routeId}`)
+  },
+
+  getTrainTripWithStopTimes: (id: number) => {
+    return request.get<TrainTrip>(`/metro/train-trips/${id}/stop-times`)
+  },
+
+  createTrainTrip: (trainTripDto: TrainTripDto) => {
+    return request.post<TrainTrip>('/metro/train-trips', trainTripDto)
+  },
+
+  updateTrainTrip: (id: number, trainTripDto: TrainTripDto) => {
+    return request.put<TrainTrip>(`/metro/train-trips/${id}`, trainTripDto)
+  },
+
+  deleteTrainTrip: (id: number | undefined) => {
+    if (id === undefined) {
+      return Promise.reject(new Error('Invalid train trip ID'))
+    }
+    return request.delete<boolean>(`/metro/train-trips/${id}`)
+  },
+
+  // StopTime methods
+  getAllStopTimes: () => {
+    return request.get<StopTime[]>('/metro/stop-times')
+  },
+
+  getStopTimeById: (id: number) => {
+    return request.get<StopTime>(`/metro/stop-times/${id}`)
+  },
+
+  getStopTimesByTrainTripId: (trainTripId: number) => {
+    return request.get<StopTime[]>(`/metro/stop-times/train-trip/${trainTripId}`)
+  },
+
+  getStopTimesByStopId: (stopId: number) => {
+    return request.get<StopTime[]>(`/metro/stop-times/stop/${stopId}`)
+  },
+
+  createStopTime: (stopTimeDto: StopTimeDto) => {
+    return request.post<StopTime>('/metro/stop-times', stopTimeDto)
+  },
+
+  updateStopTime: (id: number, stopTimeDto: StopTimeDto) => {
+    return request.put<StopTime>(`/metro/stop-times/${id}`, stopTimeDto)
+  },
+
+  deleteStopTime: (id: number | undefined) => {
+    if (id === undefined) {
+      return Promise.reject(new Error('Invalid stop time ID'))
+    }
+    return request.delete<boolean>(`/metro/stop-times/${id}`)
   }
 } 
