@@ -227,21 +227,28 @@ const submitForm = async () => {
           if (updatedStation) {
             ElMessage.success('站点信息更新成功');
             dialogVisible.value = false;
-          } else {
-            ElMessage.error(metroStore.error || '站点信息更新失败');
+          } else if (metroStore.error) {
+            ElMessage.error(metroStore.error);
           }
         } else {
           const newStation = await metroStore.createStation(stationForm);
           if (newStation) {
             ElMessage.success('站点添加成功');
             dialogVisible.value = false;
-          } else {
-            ElMessage.error(metroStore.error || '站点添加失败');
+          } else if (metroStore.error) {
+            ElMessage.error(metroStore.error);
           }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('保存站点数据失败', error);
-        ElMessage.error('保存站点数据失败');
+        // Display the error message based on the available information
+        if (error.apiMessage) {
+          ElMessage.error(error.apiMessage);
+        } else if (error.message) {
+          ElMessage.error(error.message);
+        } else {
+          ElMessage.error('保存站点数据失败');
+        }
       } finally {
         loading.value = false;
       }
@@ -268,12 +275,19 @@ const handleDelete = (row: Station) => {
 
         if (success) {
           ElMessage.success('站点删除成功');
-        } else {
-          ElMessage.error(metroStore.error || '站点删除失败');
+        } else if (metroStore.error) {
+          ElMessage.error(metroStore.error);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('删除站点失败', error);
-        ElMessage.error('删除站点失败');
+        // Display the error message based on the available information
+        if (error.apiMessage) {
+          ElMessage.error(error.apiMessage);
+        } else if (error.message) {
+          ElMessage.error(error.message);
+        } else {
+          ElMessage.error('删除站点失败');
+        }
       } finally {
         loading.value = false;
       }
