@@ -59,12 +59,28 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        // Allow only the specific frontend URL
+        // Allow only the specific frontend URLs
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://8.130.172.82:3333"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(
-                Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization", 
+                "Content-Type", 
+                "X-Requested-With", 
+                "Accept", 
+                "Origin",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Headers",
+                "Access-Control-Allow-Methods",
+                "Access-Control-Allow-Credentials"
+        ));
+        configuration.setExposedHeaders(Arrays.asList(
+                "Authorization", 
+                "Content-Disposition",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Headers",
+                "Access-Control-Allow-Methods",
+                "Access-Control-Allow-Credentials"
+        ));
         // Since we're using a specific origin, we can now safely use credentials
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
@@ -82,6 +98,7 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/metro/**").permitAll()
                         .requestMatchers(
