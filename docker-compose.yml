@@ -38,7 +38,7 @@ services:
       metro-db:
         condition: service_healthy
     environment:
-      SPRING_PROFILES_ACTIVE: docker
+      SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: metro
       SPRING_DATASOURCE_PASSWORD: metro
