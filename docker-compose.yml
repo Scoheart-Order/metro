@@ -16,7 +16,7 @@ services:
     networks:
       - metro-network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot888"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -32,15 +32,20 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - metro-db
+      metro-db:
+        condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: root
+      SPRING_PROFILES_ACTIVE: docker
     volumes:
       - maven-repo:/root/.m2/repository
     networks:
       - metro-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   # Frontend Service
   metro-fe:
@@ -53,7 +58,8 @@ services:
     ports:
       - "80:80"
     depends_on:
-      - metro-be
+      metro-be:
+        condition: service_healthy
     volumes:
       - npm-cache:/app/npm-cache
     networks:
