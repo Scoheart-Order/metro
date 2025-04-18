@@ -3,7 +3,7 @@ version: '3.8'
 services:
   # Database Service
   metro-db:
-    build: ./metro-db
+    image: mysql:8.0
     container_name: metro-db
     restart: always
     ports:
@@ -11,8 +11,11 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: metro
+      MYSQL_USER: metro
+      MYSQL_PASSWORD: metro
     volumes:
-      - mysql-data:/var/lib/mysql
+      # Mount init.sql directly to ensure it runs on startup
+      - ./metro-db/init.sql:/docker-entrypoint-initdb.d/1-schema.sql
     networks:
       - metro-network
     healthcheck:
@@ -70,6 +73,5 @@ networks:
     driver: bridge
 
 volumes:
-  mysql-data:
   maven-repo:
   npm-cache: 
