@@ -32,8 +32,8 @@ public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
-                          UserDetailsService userDetailsService,
-                          PasswordEncoder passwordEncoder) {
+            UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
@@ -53,15 +53,17 @@ public class SecurityConfig {
     }
 
     /**
-     * Configure CORS to allow cross-origin requests only from the frontend application
+     * Configure CORS to allow cross-origin requests only from the frontend
+     * application
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         // Allow only the specific frontend URL
-        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://8.130.172.82:3333"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
+        configuration.setAllowedHeaders(
+                Arrays.asList("Authorization", "Content-Type", "X-Requested-With", "Accept", "Origin"));
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Content-Disposition"));
         // Since we're using a specific origin, we can now safely use credentials
         configuration.setAllowCredentials(true);
@@ -87,10 +89,9 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-resources/**",
-                                "/webjars/**"
-                        ).permitAll()
-                        .anyRequest().authenticated()
-                )
+                                "/webjars/**")
+                        .permitAll()
+                        .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
