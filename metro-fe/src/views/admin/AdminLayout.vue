@@ -29,17 +29,25 @@
                 <el-icon><el-icon-location /></el-icon>
                 <span>地铁管理</span>
               </template>
-              <el-menu-item index="/admin/line-management"
-                >线路管理</el-menu-item
-              >
-              <el-menu-item index="/admin/station-management"
-                >站点管理</el-menu-item
-              >
-              <el-menu-item index="/admin/route-management"
-                >方向管理</el-menu-item
-              >
-              <el-menu-item index="/admin/stop-management"
-                >停靠点管理</el-menu-item
+              <el-sub-menu index="/admin/line">
+                <template #title>
+                  <span>线路管理</span>
+                </template>
+                <el-menu-item index="/admin/line-management"
+                  >线路管理</el-menu-item
+                >
+                <el-menu-item index="/admin/station-management"
+                  >站点管理</el-menu-item
+                >
+                <el-menu-item index="/admin/route-management"
+                  >方向管理</el-menu-item
+                >
+                <el-menu-item index="/admin/stop-management"
+                  >停靠点管理</el-menu-item
+                >
+              </el-sub-menu>
+              <el-menu-item index="/admin/schedule-management"
+                >时刻管理</el-menu-item
               >
             </el-sub-menu>
 
