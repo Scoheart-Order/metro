@@ -23,10 +23,16 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 # Copy nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+
+# Create startup script for environment variable substitution
+RUN echo '#!/bin/sh \n\
+envsubst "`env | awk -F = \'{printf \"$%s \", $1}\'`" < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf \n\
+nginx -g "daemon off;"' > /docker-entrypoint.sh && \
+chmod +x /docker-entrypoint.sh
 
 # Expose port 3333
 EXPOSE 3333
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"] 
+# Start nginx with our custom entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"] 
