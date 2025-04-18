@@ -120,16 +120,6 @@ public class StationServiceImpl implements StationService {
         return stationMapper.deleteStation(id) > 0;
     }
 
-    @Override
-    public List<StationDto> getAllTransferStations() {
-        List<Stop> transferStops = stopMapper.getAllTransferStops();
-        return transferStops.stream()
-                .map(stop -> stationMapper.getStationById(stop.getStationId()))
-                .distinct()
-                .map(this::convertToDto)
-                .collect(Collectors.toList());
-    }
-
     private StationDto convertToDto(Station station) {
         StationDto dto = new StationDto();
         dto.setId(station.getId());

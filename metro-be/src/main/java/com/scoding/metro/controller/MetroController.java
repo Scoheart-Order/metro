@@ -86,11 +86,6 @@ public class MetroController {
         return R.ok(stationService.getStationsByRouteId(routeId));
     }
     
-    @GetMapping("/stations/transfer")
-    public R<List<StationDto>> getAllTransferStations() {
-        return R.ok(stationService.getAllTransferStations());
-    }
-    
     @PostMapping("/stations")
     public R<StationDto> createStation(@RequestBody StationDto stationDto) {
         return R.ok(stationService.createStation(stationDto));
