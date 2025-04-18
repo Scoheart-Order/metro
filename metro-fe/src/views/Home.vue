@@ -16,11 +16,11 @@
             <template #header>
               <div class="card-header">
                 <i class="el-icon-time"></i>
-                <span>实时列车信息</span>
+                <span>到站发车时刻</span>
               </div>
             </template>
             <div class="card-content">
-              <p>获取最新的列车运行状态和到站时间，帮助您合理安排行程</p>
+              <p>查询各站点的列车到站与发车时刻表，帮助您合理安排出行时间</p>
               <el-button
                 type="primary"
                 plain
@@ -37,11 +37,11 @@
             <template #header>
               <div class="card-header">
                 <i class="el-icon-map-location"></i>
-                <span>线路规划</span>
+                <span>列车线路信息</span>
               </div>
             </template>
             <div class="card-content">
-              <p>查询各条地铁线路的站点信息，规划最佳出行路线</p>
+              <p>查询地铁线路详情和站点信息，了解各条线路的运行情况</p>
               <el-button
                 type="primary"
                 plain

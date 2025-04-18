@@ -41,13 +41,6 @@
           </el-button>
           <el-button
             size="small"
-            type="success"
-            @click="handleRoutes(scope.row)"
-          >
-            路线
-          </el-button>
-          <el-button
-            size="small"
             type="danger"
             @click="handleDelete(scope.row)"
           >

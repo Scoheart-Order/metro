@@ -98,7 +98,8 @@ public class StopServiceImpl implements StopService {
         stop.setRouteId(stopDto.getRouteId());
         stop.setStationId(stopDto.getStationId());
         stop.setSeq(stopDto.getSeq());
-        stop.setIsTransfer(stopDto.getIsTransfer());
+        stop.setArrivalTime(stopDto.getArrivalTime());
+        stop.setDepartureTime(stopDto.getDepartureTime());
         
         stopMapper.insertStop(stop);
         
@@ -130,7 +131,7 @@ public class StopServiceImpl implements StopService {
                 !existingStop.getStationId().equals(stopDto.getStationId())) {
             Stop stopWithSameCombination = stopMapper.getStopByRouteAndStation(
                     stopDto.getRouteId(), stopDto.getStationId());
-            if (stopWithSameCombination != null) {
+            if (stopWithSameCombination != null && !stopWithSameCombination.getId().equals(id)) {
                 throw new BusinessException("该路线下已存在此站点");
             }
         }
@@ -151,7 +152,8 @@ public class StopServiceImpl implements StopService {
         stop.setRouteId(stopDto.getRouteId());
         stop.setStationId(stopDto.getStationId());
         stop.setSeq(stopDto.getSeq());
-        stop.setIsTransfer(stopDto.getIsTransfer());
+        stop.setArrivalTime(stopDto.getArrivalTime());
+        stop.setDepartureTime(stopDto.getDepartureTime());
         
         stopMapper.updateStop(stop);
         
@@ -175,7 +177,8 @@ public class StopServiceImpl implements StopService {
         dto.setRouteId(stop.getRouteId());
         dto.setStationId(stop.getStationId());
         dto.setSeq(stop.getSeq());
-        dto.setIsTransfer(stop.getIsTransfer());
+        dto.setArrivalTime(stop.getArrivalTime());
+        dto.setDepartureTime(stop.getDepartureTime());
         
         // 获取路线名称
         if (stop.getRoute() != null) {

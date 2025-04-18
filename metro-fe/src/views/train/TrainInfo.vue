@@ -1,54 +1,70 @@
 <template>
-  <div class="train-info-container">
+  <div class="stop-schedule-container">
     <el-card>
       <template #header>
         <div class="page-header">
-          <h2>列车时刻查询</h2>
+          <h2>停靠点时刻查询</h2>
         </div>
       </template>
       
       <!-- Search Form -->
       <div class="search-section">
         <el-form :model="searchForm" :inline="true">
-          <el-form-item label="出发站">
+          <el-form-item label="线路">
             <el-select
-              v-model="searchForm.startStation"
+              v-model="searchForm.lineId"
               filterable
-              placeholder="出发站"
+              placeholder="选择线路"
               style="width: 180px"
+              @change="handleLineChange"
             >
               <el-option
-                v-for="station in stationOptions"
-                :key="station.value"
-                :label="station.label"
-                :value="station.value"
+                v-for="line in lines"
+                :key="line.id"
+                :label="line.name"
+                :value="line.id"
+              >
+                <div class="line-option">
+                  <div class="color-badge" :style="{ backgroundColor: line.color }"></div>
+                  <span>{{ line.name }}</span>
+                </div>
+              </el-option>
+            </el-select>
+          </el-form-item>
+          
+          <el-form-item label="方向">
+            <el-select
+              v-model="searchForm.routeId"
+              filterable
+              placeholder="选择方向"
+              style="width: 180px"
+              :disabled="!searchForm.lineId"
+              @change="handleRouteChange"
+            >
+              <el-option
+                v-for="route in routes"
+                :key="route.id"
+                :label="route.name"
+                :value="route.id"
               />
             </el-select>
           </el-form-item>
           
-          <el-form-item label="到达站">
+          <el-form-item label="站点">
             <el-select
-              v-model="searchForm.endStation"
+              v-model="searchForm.stationId"
               filterable
-              placeholder="到达站"
+              placeholder="选择站点"
               style="width: 180px"
+              :disabled="!searchForm.routeId"
             >
               <el-option
-                v-for="station in stationOptions"
-                :key="station.value"
-                :label="station.label"
-                :value="station.value"
+                v-for="station in stations"
+                :key="station.id"
+                :label="station.name"
+                :value="station.id"
               />
             </el-select>
-          </el-form-item>
-          
-          <el-form-item label="日期">
-            <el-date-picker
-              v-model="searchForm.date"
-              type="date"
-              placeholder="选择日期"
-              style="width: 180px"
-            />
           </el-form-item>
           
           <el-form-item>
@@ -62,216 +78,257 @@
         </el-form>
       </div>
       
-      <!-- Train List -->
-      <div class="train-list-section">
+      <!-- Results Section -->
+      <div class="results-section">
         <div v-if="loading" class="loading-container">
           <el-skeleton :rows="6" animated />
         </div>
         
-        <div v-else-if="trainStore.trains.length === 0" class="empty-data">
-          <el-empty description="暂无列车信息" />
+        <div v-else-if="!stopInfo" class="empty-data">
+          <el-empty description="请选择线路、方向和站点进行查询" />
         </div>
         
-        <div v-else>
-          <el-table :data="trainStore.trains" border stripe>
-            <el-table-column prop="trainNumber" label="车次" width="100" align="center" />
-            <el-table-column prop="startStation" label="出发站" width="120" align="center" />
-            <el-table-column prop="endStation" label="到达站" width="120" align="center" />
-            <el-table-column prop="departureTime" label="出发时间" width="150" align="center" />
-            <el-table-column prop="arrivalTime" label="到达时间" width="150" align="center" />
-            <el-table-column prop="status" label="状态" width="100" align="center">
-              <template #default="scope">
-                <el-tag
-                  :type="getStatusType(scope.row.status)"
-                  effect="plain"
-                >
-                  {{ getStatusText(scope.row.status) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column label="操作" align="center">
-              <template #default="scope">
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="viewTrainDetail(scope.row)"
-                >
-                  详情
-                </el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-      </div>
-      
-      <!-- Train Detail Dialog -->
-      <el-dialog
-        v-model="dialogVisible"
-        title="列车详情"
-        width="500px"
-      >
-        <div v-if="currentTrain">
-          <el-descriptions :column="1" border>
-            <el-descriptions-item label="车次">{{ currentTrain.trainNumber }}</el-descriptions-item>
-            <el-descriptions-item label="出发站">{{ currentTrain.startStation }}</el-descriptions-item>
-            <el-descriptions-item label="到达站">{{ currentTrain.endStation }}</el-descriptions-item>
-            <el-descriptions-item label="出发时间">{{ currentTrain.departureTime }}</el-descriptions-item>
-            <el-descriptions-item label="到达时间">{{ currentTrain.arrivalTime }}</el-descriptions-item>
-            <el-descriptions-item label="状态">
-              <el-tag :type="getStatusType(currentTrain.status)">
-                {{ getStatusText(currentTrain.status) }}
-              </el-tag>
-            </el-descriptions-item>
-          </el-descriptions>
+        <div v-else class="schedule-card">
+          <div class="station-info">
+            <h3>{{ stopInfo.stationName }}</h3>
+            <div class="line-info">
+              <div class="color-badge" 
+                   :style="{ backgroundColor: getLineColor(searchForm.lineId) }"></div>
+              <span>{{ getLineName(searchForm.lineId) }}</span>
+              <el-divider direction="vertical" />
+              <span>{{ getRouteName(searchForm.routeId) }}</span>
+            </div>
+          </div>
           
-          <div class="station-timeline">
-            <h3>途经站点</h3>
-            <el-timeline>
-              <el-timeline-item
-                v-for="(station, index) in stationTimeline"
-                :key="index"
-                :timestamp="station.time"
-                :type="getTimelineItemType(index, stationTimeline.length)"
-              >
-                {{ station.name }}
-              </el-timeline-item>
-            </el-timeline>
+          <div class="time-info">
+            <div class="time-item">
+              <div class="time-label">到站时间</div>
+              <div class="time-value">{{ stopInfo.arrivalTime || '未设置' }}</div>
+            </div>
+            <div class="time-item">
+              <div class="time-label">发车时间</div>
+              <div class="time-value">{{ stopInfo.departureTime || '未设置' }}</div>
+            </div>
+          </div>
+          
+          <div class="station-position">
+            <div class="position-label">站点序号</div>
+            <div class="position-value">{{ stopInfo.seq }}</div>
+          </div>
+          
+          <div v-if="stopInfo.isTransfer" class="transfer-info">
+            <el-tag type="success">换乘站</el-tag>
           </div>
         </div>
-      </el-dialog>
+        
+        <!-- Route Timeline -->
+        <div v-if="stopInfo" class="route-timeline">
+          <h3>方向时刻表</h3>
+          <el-timeline>
+            <el-timeline-item
+              v-for="stop in routeStops"
+              :key="stop.id"
+              :type="getTimelineItemType(stop, stopInfo.id)"
+              :timestamp="getTimeDisplay(stop)"
+            >
+              <div class="timeline-content">
+                <div class="station-name">{{ stop.stationName }}</div>
+                <div v-if="stop.isTransfer" class="transfer-tag">
+                  <el-tag size="small" type="success">换乘站</el-tag>
+                </div>
+              </div>
+            </el-timeline-item>
+          </el-timeline>
+        </div>
+      </div>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
-import { useTrainStore } from '../../stores/train'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, onMounted } from 'vue';
+import { ElMessage } from 'element-plus';
+import { metroApi } from '../../api/modules/metro';
+import type { Line, Route, Station, Stop } from '../../api/modules/metro';
 
-const route = useRoute()
-const trainStore = useTrainStore()
-const loading = ref(false)
-const dialogVisible = ref(false)
-const currentTrain = ref(null)
+// 数据状态
+const loading = ref(false);
+const lines = ref<Line[]>([]);
+const routes = ref<Route[]>([]);
+const stations = ref<Station[]>([]);
+const routeStops = ref<Stop[]>([]);
+const stopInfo = ref<Stop | null>(null);
 
-// Station timeline (would come from API in real app)
-const stationTimeline = ref([
-  { name: '中心站', time: '06:30' },
-  { name: '北站', time: '06:45' },
-  { name: '机场站', time: '07:05' },
-  { name: '东站', time: '07:20' },
-  { name: '南站', time: '07:35' }
-])
-
-// Station options (would come from API in real app)
-const stationOptions = ref([
-  { value: 'station1', label: '中心站' },
-  { value: 'station2', label: '北站' },
-  { value: 'station3', label: '南站' },
-  { value: 'station4', label: '东站' },
-  { value: 'station5', label: '西站' },
-  { value: 'station6', label: '机场站' },
-  // More stations would be loaded from API
-])
-
-// Search form
+// 搜索表单
 const searchForm = reactive({
-  startStation: route.query.startStation || '',
-  endStation: route.query.endStation || '',
-  date: route.query.date ? new Date(route.query.date as string) : new Date()
-})
+  lineId: 0,
+  routeId: 0,
+  stationId: 0
+});
 
-// Status display helpers
-const getStatusType = (status: string) => {
-  switch (status) {
-    case 'on-time': return 'success'
-    case 'delayed': return 'warning'
-    case 'cancelled': return 'danger'
-    default: return 'info'
+// 加载所有线路
+const loadLines = async () => {
+  try {
+    lines.value = await metroApi.getAllLines();
+  } catch (error) {
+    console.error('获取线路数据失败', error);
+    ElMessage.error('获取线路数据失败');
   }
-}
+};
 
-const getStatusText = (status: string) => {
-  switch (status) {
-    case 'on-time': return '准点'
-    case 'delayed': return '晚点'
-    case 'cancelled': return '取消'
-    default: return '未知'
-  }
-}
-
-const getTimelineItemType = (index: number, totalLength: number) => {
-  if (index === 0) return 'primary'
-  if (index === totalLength - 1) return 'success'
-  return ''
-}
-
-// Load data on component mount
-onMounted(async () => {
-  // If there are query parameters, search with them
-  if (route.query.startStation && route.query.endStation) {
-    await handleSearch()
-  } else {
-    // Otherwise load all trains
-    await fetchTrains()
-  }
-})
-
-// Fetch all trains
-const fetchTrains = async () => {
-  loading.value = true
+// 根据线路加载方向
+const loadRoutesByLine = async (lineId: number) => {
+  if (!lineId) return;
   
   try {
-    await trainStore.fetchTrains()
+    routes.value = await metroApi.getRoutesByLineId(lineId);
   } catch (error) {
-    console.error('Fetch trains error:', error)
-    ElMessage.error('获取列车信息失败')
-  } finally {
-    loading.value = false
+    console.error('获取方向数据失败', error);
+    ElMessage.error('获取方向数据失败');
   }
-}
+};
 
-// Search function
+// 加载方向的所有停靠点
+const loadStopsByRoute = async (routeId: number) => {
+  if (!routeId) return;
+  
+  try {
+    const stops = await metroApi.getStopsByRouteId(routeId);
+    routeStops.value = stops.sort((a, b) => a.seq - b.seq);
+    
+    // 提取出所有站点ID
+    const stationIds = stops.map(stop => stop.stationId);
+    
+    // 获取这些站点的详细信息
+    const stationsList = await Promise.all(
+      stationIds.map(id => metroApi.getStationById(id))
+    );
+    
+    stations.value = stationsList;
+  } catch (error) {
+    console.error('获取停靠点数据失败', error);
+    ElMessage.error('获取停靠点数据失败');
+  }
+};
+
+// 获取特定停靠点信息
+const getStopInfo = async (routeId: number, stationId: number) => {
+  if (!routeId || !stationId) return null;
+  
+  try {
+    loading.value = true;
+    
+    // 查找方向的所有停靠点
+    const stops = await metroApi.getStopsByRouteId(routeId);
+    
+    // 找到匹配站点的停靠点
+    const stop = stops.find(s => s.stationId === stationId);
+    
+    if (!stop) {
+      ElMessage.warning('未找到该站点的停靠信息');
+      return null;
+    }
+    
+    return stop;
+  } catch (error) {
+    console.error('获取停靠点信息失败', error);
+    ElMessage.error('获取停靠点信息失败');
+    return null;
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 事件处理器
+const handleLineChange = async (lineId: number) => {
+  searchForm.routeId = 0;
+  searchForm.stationId = 0;
+  routes.value = [];
+  stations.value = [];
+  stopInfo.value = null;
+  
+  if (lineId) {
+    await loadRoutesByLine(lineId);
+  }
+};
+
+const handleRouteChange = async (routeId: number) => {
+  searchForm.stationId = 0;
+  stations.value = [];
+  stopInfo.value = null;
+  
+  if (routeId) {
+    await loadStopsByRoute(routeId);
+  }
+};
+
 const handleSearch = async () => {
-  if (!searchForm.startStation || !searchForm.endStation) {
-    ElMessage.warning('请选择出发站和到达站')
-    return
+  if (!searchForm.lineId || !searchForm.routeId || !searchForm.stationId) {
+    ElMessage.warning('请选择线路、方向和站点');
+    return;
   }
   
-  loading.value = true
+  loading.value = true;
   
   try {
-    await trainStore.searchTrains({
-      startStation: searchForm.startStation,
-      endStation: searchForm.endStation,
-      date: searchForm.date.toISOString().split('T')[0]
-    })
+    const stop = await getStopInfo(searchForm.routeId, searchForm.stationId);
+    stopInfo.value = stop;
+    
+    if (!stopInfo.value) {
+      ElMessage.warning('未找到该站点的停靠信息');
+    }
   } catch (error) {
-    console.error('Search error:', error)
-    ElMessage.error('查询失败，请稍后重试')
+    console.error('查询失败', error);
+    ElMessage.error('查询失败，请稍后重试');
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 
-// Reset search form
 const resetSearch = () => {
-  searchForm.startStation = ''
-  searchForm.endStation = ''
-  searchForm.date = new Date()
-  fetchTrains()
-}
+  searchForm.lineId = 0;
+  searchForm.routeId = 0;
+  searchForm.stationId = 0;
+  routes.value = [];
+  stations.value = [];
+  stopInfo.value = null;
+  routeStops.value = [];
+};
 
-// View train detail
-const viewTrainDetail = (train) => {
-  currentTrain.value = train
-  dialogVisible.value = true
-}
+// 辅助函数
+const getLineColor = (lineId: number): string => {
+  const line = lines.value.find(l => l.id === lineId);
+  return line?.color || '#909399';
+};
+
+const getLineName = (lineId: number): string => {
+  const line = lines.value.find(l => l.id === lineId);
+  return line?.name || '';
+};
+
+const getRouteName = (routeId: number): string => {
+  const route = routes.value.find(r => r.id === routeId);
+  return route?.name || '';
+};
+
+const getTimelineItemType = (stop: Stop, currentStopId: number): string => {
+  return stop.id === currentStopId ? 'primary' : '';
+};
+
+const getTimeDisplay = (stop: Stop): string => {
+  const arrival = stop.arrivalTime || '--:--';
+  const departure = stop.departureTime || '--:--';
+  return `${arrival} - ${departure}`;
+};
+
+// 生命周期
+onMounted(async () => {
+  await loadLines();
+});
 </script>
 
 <style scoped lang="scss">
-.train-info-container {
+.stop-schedule-container {
   .page-header {
     display: flex;
     justify-content: space-between;
@@ -291,7 +348,21 @@ const viewTrainDetail = (train) => {
     border-radius: 4px;
   }
   
-  .train-list-section {
+  .line-option {
+    display: flex;
+    align-items: center;
+  }
+  
+  .color-badge {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+  
+  .results-section {
     .loading-container {
       padding: 20px 0;
     }
@@ -299,20 +370,98 @@ const viewTrainDetail = (train) => {
     .empty-data {
       padding: 40px 0;
     }
-  }
-  
-  .station-timeline {
-    margin-top: 20px;
     
-    h3 {
-      margin-bottom: 16px;
-      color: #303133;
+    .schedule-card {
+      background-color: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+      padding: 20px;
+      margin-bottom: 20px;
+      
+      .station-info {
+        margin-bottom: 20px;
+        
+        h3 {
+          margin: 0 0 10px 0;
+          font-size: 1.5rem;
+          color: #303133;
+        }
+        
+        .line-info {
+          display: flex;
+          align-items: center;
+          color: #606266;
+        }
+      }
+      
+      .time-info {
+        display: flex;
+        margin-bottom: 20px;
+        gap: 20px;
+        
+        .time-item {
+          flex: 1;
+          background-color: #f5f7fa;
+          padding: 15px;
+          border-radius: 4px;
+          
+          .time-label {
+            font-size: 14px;
+            color: #909399;
+            margin-bottom: 5px;
+          }
+          
+          .time-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #303133;
+          }
+        }
+      }
+      
+      .station-position {
+        margin-bottom: 16px;
+        
+        .position-label {
+          font-size: 14px;
+          color: #909399;
+          margin-bottom: 5px;
+        }
+        
+        .position-value {
+          font-size: 18px;
+          color: #303133;
+        }
+      }
+      
+      .transfer-info {
+        margin-top: 10px;
+      }
+    }
+    
+    .route-timeline {
+      margin-top: 30px;
+      
+      h3 {
+        margin-bottom: 16px;
+        color: #303133;
+      }
+      
+      .timeline-content {
+        display: flex;
+        align-items: center;
+        
+        .station-name {
+          font-weight: 500;
+          margin-right: 10px;
+        }
+      }
     }
   }
 }
 
 @media (max-width: 768px) {
-  .train-info-container {
+  .stop-schedule-container {
     .search-section {
       .el-form {
         display: flex;
@@ -321,6 +470,14 @@ const viewTrainDetail = (train) => {
         .el-form-item {
           margin-right: 0;
           margin-bottom: 15px;
+        }
+      }
+    }
+    
+    .results-section {
+      .schedule-card {
+        .time-info {
+          flex-direction: column;
         }
       }
     }

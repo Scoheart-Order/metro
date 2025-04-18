@@ -79,7 +79,6 @@ public class RouteServiceImpl implements RouteService {
                     stationDto.setId(station.getId());
                     stationDto.setName(station.getName());
                     stationDto.setCode(station.getCode());
-                    stationDto.setIsTransfer(stop.getIsTransfer());
                     return stationDto;
                 })
                 .collect(Collectors.toList()));

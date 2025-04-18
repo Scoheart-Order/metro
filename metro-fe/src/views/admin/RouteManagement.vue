@@ -1,6 +1,6 @@
 <template>
   <div class="route-management-container">
-    <h1 class="page-title">路线管理</h1>
+    <h1 class="page-title">方向管理</h1>
 
     <div class="control-panel">
       <div class="filter-group">
@@ -29,7 +29,7 @@
 
         <el-input
           v-model="searchQuery"
-          placeholder="搜索路线名称"
+          placeholder="搜索方向名称"
           class="search-input"
           clearable
           @clear="handleSearchClear"
@@ -41,11 +41,15 @@
       </div>
 
       <el-button type="primary" @click="openAddDialog">
-        <el-icon><Plus /></el-icon>添加路线
+        <el-icon><Plus /></el-icon>添加方向
       </el-button>
     </div>
 
-    <el-table :data="filteredRoutes.data" style="width: 100%" v-loading="loading">
+    <el-table
+      :data="filteredRoutes.data"
+      style="width: 100%"
+      v-loading="loading"
+    >
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column label="所属线路" width="150">
         <template #default="scope">
@@ -58,7 +62,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="name" label="路线名称" width="180" />
+      <el-table-column prop="name" label="方向名称" width="180" />
       <el-table-column label="起始站" width="150">
         <template #default="scope">
           {{ getStationName(scope.row.startStationId) }}
@@ -79,10 +83,11 @@
           <el-button size="small" type="primary" @click="handleEdit(scope.row)">
             编辑
           </el-button>
-          <el-button size="small" type="success" @click="handleStops(scope.row)">
-            管理停靠点
-          </el-button>
-          <el-button size="small" type="danger" @click="handleDelete(scope.row)">
+          <el-button
+            size="small"
+            type="danger"
+            @click="handleDelete(scope.row)"
+          >
             删除
           </el-button>
         </template>
@@ -100,10 +105,10 @@
       class="pagination"
     />
 
-    <!-- 添加/编辑路线对话框 -->
+    <!-- 添加/编辑方向对话框 -->
     <el-dialog
       v-model="dialogVisible"
-      :title="isEdit ? '编辑路线' : '添加路线'"
+      :title="isEdit ? '编辑方向' : '添加方向'"
       width="50%"
     >
       <el-form
@@ -134,7 +139,7 @@
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="路线名称" prop="name">
+        <el-form-item label="方向名称" prop="name">
           <el-input v-model="routeForm.name" placeholder="例如：往徐家汇方向" />
         </el-form-item>
         <el-form-item label="起始站" prop="startStationId">
@@ -167,24 +172,6 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="距离(公里)" prop="distance">
-          <el-input-number 
-            v-model="routeForm.distance" 
-            :precision="2" 
-            :step="0.1" 
-            :min="0"
-            style="width: 100%" 
-          />
-        </el-form-item>
-        <el-form-item label="预计时间(分钟)" prop="estimatedTime">
-          <el-input-number 
-            v-model="routeForm.estimatedTime" 
-            :precision="0" 
-            :step="1" 
-            :min="0"
-            style="width: 100%" 
-          />
-        </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
@@ -215,7 +202,7 @@ const currentPage = ref(1);
 const pageSize = ref(10);
 const searchQuery = ref('');
 
-// 分页和搜索过滤后的路线数据
+// 分页和搜索过滤后的方向数据
 const filteredRoutes = computed(() => {
   let filtered = metroStore.routes;
 
@@ -242,11 +229,11 @@ const filteredRoutes = computed(() => {
 
   return {
     data: filtered,
-    total: totalFilteredRoutes
+    total: totalFilteredRoutes,
   };
 });
 
-// 总路线数，用于分页组件
+// 总方向数，用于分页组件
 const totalRoutes = computed(() => filteredRoutes.value.total);
 
 // 对话框控制
@@ -254,7 +241,7 @@ const dialogVisible = ref(false);
 const isEdit = ref(false);
 const routeFormRef = ref<FormInstance | null>(null);
 
-// 路线表单
+// 方向表单
 const routeForm = reactive<RouteDto>({
   id: null,
   lineId: 0,
@@ -262,14 +249,14 @@ const routeForm = reactive<RouteDto>({
   startStationId: 0,
   endStationId: 0,
   distance: 0,
-  estimatedTime: 0
+  estimatedTime: 0,
 });
 
 // 表单验证规则
 const rules = {
   lineId: [{ required: true, message: '请选择所属线路', trigger: 'change' }],
   name: [
-    { required: true, message: '请输入路线名称', trigger: 'blur' },
+    { required: true, message: '请输入方向名称', trigger: 'blur' },
     { max: 50, message: '长度不能超过50个字符', trigger: 'blur' },
   ],
   startStationId: [
@@ -280,12 +267,12 @@ const rules = {
   ],
   distance: [
     { required: true, message: '请输入距离', trigger: 'blur' },
-    { type: 'number', min: 0, message: '距离不能小于0', trigger: 'blur' }
+    { type: 'number', min: 0, message: '距离不能小于0', trigger: 'blur' },
   ],
   estimatedTime: [
     { required: true, message: '请输入预计时间（分钟）', trigger: 'blur' },
-    { type: 'number', min: 0, message: '时间不能小于0', trigger: 'blur' }
-  ]
+    { type: 'number', min: 0, message: '时间不能小于0', trigger: 'blur' },
+  ],
 };
 
 // 生命周期钩子
@@ -295,7 +282,7 @@ onMounted(async () => {
   await Promise.all([
     metroStore.fetchLines(),
     metroStore.fetchStations(),
-    metroStore.fetchRoutes()
+    metroStore.fetchRoutes(),
   ]);
   loading.value = false;
 });
@@ -333,7 +320,7 @@ const getStationName = (stationId: number) => {
   return station ? station.name : '';
 };
 
-// 获取路线经过的站点数
+// 获取方向经过的站点数
 const getStationsCount = (route: Route) => {
   if (route.stations) {
     return route.stations.length;
@@ -403,25 +390,28 @@ const submitForm = async () => {
 
       try {
         if (isEdit.value && routeForm.id !== null) {
-          const updatedRoute = await metroStore.updateRoute(routeForm.id as number, routeForm);
+          const updatedRoute = await metroStore.updateRoute(
+            routeForm.id as number,
+            routeForm
+          );
           if (updatedRoute) {
-            ElMessage.success('路线信息更新成功');
+            ElMessage.success('方向信息更新成功');
             dialogVisible.value = false;
           } else {
-            ElMessage.error(metroStore.error || '路线信息更新失败');
+            ElMessage.error(metroStore.error || '方向信息更新失败');
           }
         } else {
           const newRoute = await metroStore.createRoute(routeForm);
           if (newRoute) {
-            ElMessage.success('路线添加成功');
+            ElMessage.success('方向添加成功');
             dialogVisible.value = false;
           } else {
-            ElMessage.error(metroStore.error || '路线添加失败');
+            ElMessage.error(metroStore.error || '方向添加失败');
           }
         }
       } catch (error) {
-        console.error('保存路线数据失败', error);
-        ElMessage.error('保存路线数据失败');
+        console.error('保存方向数据失败', error);
+        ElMessage.error('保存方向数据失败');
       } finally {
         loading.value = false;
       }
@@ -430,31 +420,31 @@ const submitForm = async () => {
 };
 
 const handleDelete = (row: Route) => {
-  ElMessageBox.confirm(`确定要删除路线 ${row.name} 吗？`, '确认删除', {
+  ElMessageBox.confirm(`确定要删除方向 ${row.name} 吗？`, '确认删除', {
     confirmButtonText: '确定',
     cancelButtonText: '取消',
     type: 'warning',
   })
     .then(async () => {
       loading.value = true;
-      
+
       try {
         // Ensure row.id is defined
         if (typeof row.id !== 'number') {
-          ElMessage.error('路线ID无效');
+          ElMessage.error('方向ID无效');
           return;
         }
-        
+
         const success = await metroStore.deleteRoute(row.id);
-        
+
         if (success) {
-          ElMessage.success('路线删除成功');
+          ElMessage.success('方向删除成功');
         } else {
-          ElMessage.error(metroStore.error || '路线删除失败');
+          ElMessage.error(metroStore.error || '方向删除失败');
         }
       } catch (error) {
-        console.error('删除路线失败', error);
-        ElMessage.error('删除路线失败');
+        console.error('删除方向失败', error);
+        ElMessage.error('删除方向失败');
       } finally {
         loading.value = false;
       }
@@ -467,10 +457,10 @@ const handleDelete = (row: Route) => {
 const handleStops = (row: Route) => {
   // Ensure row.id is defined
   if (typeof row.id !== 'number') {
-    ElMessage.error('路线ID无效');
+    ElMessage.error('方向ID无效');
     return;
   }
-  
+
   router.push(`/admin/route/${row.id}/stops`);
 };
 </script>

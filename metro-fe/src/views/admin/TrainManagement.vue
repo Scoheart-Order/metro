@@ -29,15 +29,6 @@
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="trainNumber" label="列车编号" width="120" />
       <el-table-column prop="name" label="列车名称" width="180" />
-      <el-table-column prop="type" label="列车类型" width="120" />
-      <el-table-column prop="capacity" label="载客量" width="100" />
-      <el-table-column prop="status" label="运行状态" width="120">
-        <template #default="scope">
-          <el-tag :type="getStatusType(scope.row.status)">
-            {{ getStatusText(scope.row.status) }}
-          </el-tag>
-        </template>
-      </el-table-column>
       <el-table-column prop="startTime" label="首班时间" width="140" />
       <el-table-column prop="endTime" label="末班时间" width="140" />
       <el-table-column label="操作" width="250">
@@ -45,13 +36,13 @@
           <el-button size="small" type="primary" @click="handleEdit(scope.row)">
             编辑
           </el-button>
-          <el-button
+          <!-- <el-button
             size="small"
             type="success"
             @click="handleSchedule(scope.row)"
           >
             时刻表
-          </el-button>
+          </el-button> -->
           <el-button
             size="small"
             type="danger"

@@ -7,7 +7,7 @@ INSERT INTO line (id, name, code, color, operator) VALUES
                                                         (5, '5号线', 'L05', '#800080', '上海申通地铁集团');
 
 -- Stations
-INSERT INTO station (id, name, code) VALUES
+INSERT INTO station (id, name, code, address, is_transfer) VALUES
 -- 1号线站点
 (101, '莘庄站', 'S101', '上海市闵行区莘庄镇莘浜路', true),
 (102, '外环路站', 'S102', '上海市闵行区莘庄镇外环路', false),

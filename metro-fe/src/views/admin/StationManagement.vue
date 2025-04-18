@@ -24,14 +24,6 @@
       <el-table-column prop="id" label="ID" width="80" />
       <el-table-column prop="name" label="站点名称" width="180" />
       <el-table-column prop="code" label="站点编号" width="120" />
-      <el-table-column prop="address" label="地址" width="200" />
-      <el-table-column label="是否换乘站" width="100">
-        <template #default="scope">
-          <el-tag :type="scope.row.isTransferStation ? 'success' : 'info'">
-            {{ scope.row.isTransferStation ? '是' : '否' }}
-          </el-tag>
-        </template>
-      </el-table-column>
       <el-table-column label="操作">
         <template #default="scope">
           <el-button size="small" type="primary" @click="handleEdit(scope.row)">
@@ -76,15 +68,6 @@
         </el-form-item>
         <el-form-item label="站点编号" prop="code">
           <el-input v-model="stationForm.code" placeholder="例如：S001" />
-        </el-form-item>
-        <el-form-item label="站点地址" prop="address">
-          <el-input
-            v-model="stationForm.address"
-            placeholder="例如：人民广场1号"
-          />
-        </el-form-item>
-        <el-form-item label="是否换乘站" prop="isTransferStation">
-          <el-switch v-model="stationForm.isTransferStation" />
         </el-form-item>
       </el-form>
       <template #footer>

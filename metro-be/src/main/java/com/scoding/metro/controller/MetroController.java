@@ -4,9 +4,11 @@ import com.scoding.metro.common.R;
 import com.scoding.metro.dto.LineDto;
 import com.scoding.metro.dto.RouteDto;
 import com.scoding.metro.dto.StationDto;
+import com.scoding.metro.dto.StopDto;
 import com.scoding.metro.service.LineService;
 import com.scoding.metro.service.RouteService;
 import com.scoding.metro.service.StationService;
+import com.scoding.metro.service.StopService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,7 @@ public class MetroController {
     private final LineService lineService;
     private final StationService stationService;
     private final RouteService routeService;
+    private final StopService stopService;
     
     // 线路相关接口
     @GetMapping("/lines")
@@ -143,5 +146,36 @@ public class MetroController {
     @DeleteMapping("/routes/{id}")
     public R<Boolean> deleteRoute(@PathVariable Long id) {
         return R.ok(routeService.deleteRoute(id));
+    }
+    
+    // 停靠点相关接口
+    @GetMapping("/stops")
+    public R<List<StopDto>> getAllStops() {
+        return R.ok(stopService.getAllStops());
+    }
+    
+    @GetMapping("/stops/{id}")
+    public R<StopDto> getStopById(@PathVariable Long id) {
+        return R.ok(stopService.getStopById(id));
+    }
+    
+    @GetMapping("/stops/route/{routeId}")
+    public R<List<StopDto>> getStopsByRouteId(@PathVariable Long routeId) {
+        return R.ok(stopService.getStopsByRouteId(routeId));
+    }
+    
+    @PostMapping("/stops")
+    public R<StopDto> createStop(@RequestBody StopDto stopDto) {
+        return R.ok(stopService.createStop(stopDto));
+    }
+    
+    @PutMapping("/stops/{id}")
+    public R<StopDto> updateStop(@PathVariable Long id, @RequestBody StopDto stopDto) {
+        return R.ok(stopService.updateStop(id, stopDto));
+    }
+    
+    @DeleteMapping("/stops/{id}")
+    public R<Boolean> deleteStop(@PathVariable Long id) {
+        return R.ok(stopService.deleteStop(id));
     }
 } 

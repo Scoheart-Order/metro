@@ -13,7 +13,7 @@
               </div>
               <div class="stat-card-data">
                 <div class="stat-card-value">{{ stats.trainCount }}</div>
-                <div class="stat-card-label">列车数量</div>
+                <div class="stat-card-label">站点数量</div>
               </div>
             </div>
           </el-card>
@@ -67,19 +67,7 @@
     <div class="quick-access">
       <h3>快捷操作</h3>
       <el-row :gutter="20">
-        <el-col :xs="24" :sm="8">
-          <el-card shadow="hover" class="action-card">
-            <div
-              class="action-card-content"
-              @click="$router.push('/admin/train-management')"
-            >
-              <i class="el-icon-plus"></i>
-              <span>发布列车信息</span>
-            </div>
-          </el-card>
-        </el-col>
-
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="6">
           <el-card shadow="hover" class="action-card">
             <div
               class="action-card-content"
@@ -91,7 +79,19 @@
           </el-card>
         </el-col>
 
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="6">
+          <el-card shadow="hover" class="action-card">
+            <div
+              class="action-card-content"
+              @click="$router.push('/admin/station-management')"
+            >
+              <i class="el-icon-plus"></i>
+              <span>发布站点信息</span>
+            </div>
+          </el-card>
+        </el-col>
+
+        <el-col :xs="24" :sm="6">
           <el-card shadow="hover" class="action-card">
             <div
               class="action-card-content"
@@ -102,27 +102,19 @@
             </div>
           </el-card>
         </el-col>
-      </el-row>
-    </div>
 
-    <!-- Recent Activity -->
-    <div class="recent-activity">
-      <h3>最近活动</h3>
-      <el-card shadow="hover">
-        <el-timeline>
-          <el-timeline-item
-            v-for="(activity, index) in activities"
-            :key="index"
-            :timestamp="activity.time"
-            :type="activity.type"
-          >
-            <div class="activity-content">
-              <span class="activity-user">{{ activity.user }}</span>
-              <span class="activity-action">{{ activity.action }}</span>
+        <el-col :xs="24" :sm="6">
+          <el-card shadow="hover" class="action-card">
+            <div
+              class="action-card-content"
+              @click="$router.push('/admin/request-management')"
+            >
+              <i class="el-icon-document"></i>
+              <span>处理需求</span>
             </div>
-          </el-timeline-item>
-        </el-timeline>
-      </el-card>
+          </el-card>
+        </el-col>
+      </el-row>
     </div>
 
     <!-- System Status -->
@@ -137,7 +129,6 @@
           <el-descriptions-item label="数据库状态">
             <el-tag type="success">正常</el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="在线用户数">128</el-descriptions-item>
           <el-descriptions-item label="系统更新">
             <el-tag type="info">无可用更新</el-tag>
           </el-descriptions-item>

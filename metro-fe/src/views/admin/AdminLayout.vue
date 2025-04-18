@@ -19,19 +19,16 @@
             text-color="#fff"
             active-text-color="#409EFF"
           >
-            <!-- <el-menu-item index="/admin">
+            <el-menu-item index="/admin">
               <el-icon><el-icon-menu /></el-icon>
               <span>首页</span>
-            </el-menu-item> -->
+            </el-menu-item>
 
             <el-sub-menu index="/admin/train">
               <template #title>
                 <el-icon><el-icon-location /></el-icon>
                 <span>地铁管理</span>
               </template>
-              <el-menu-item index="/admin/train-management"
-                >时刻信息</el-menu-item
-              >
               <el-menu-item index="/admin/line-management"
                 >线路管理</el-menu-item
               >
@@ -39,7 +36,7 @@
                 >站点管理</el-menu-item
               >
               <el-menu-item index="/admin/route-management"
-                >路线管理</el-menu-item
+                >方向管理</el-menu-item
               >
               <el-menu-item index="/admin/stop-management"
                 >停靠点管理</el-menu-item

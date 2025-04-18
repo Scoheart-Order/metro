@@ -49,6 +49,22 @@ export interface Route extends RouteDto {
   endStation?: Station
 }
 
+// Stop interfaces
+export interface StopDto {
+  id?: number | null
+  routeId: number
+  stationId: number
+  seq: number
+  arrivalTime?: string | null
+  departureTime?: string | null
+}
+
+export interface Stop extends StopDto {
+  id: number
+  routeName?: string
+  stationName?: string
+}
+
 /**
  * Metro API methods
  */
@@ -162,5 +178,30 @@ export const metroApi = {
       return Promise.reject(new Error('Invalid route ID'))
     }
     return request.delete<boolean>(`/metro/routes/${id}`)
+  },
+
+  // Stop methods
+  getAllStops: () => {
+    return request.get<Stop[]>('/metro/stops')
+  },
+
+  getStopById: (id: number) => {
+    return request.get<Stop>(`/metro/stops/${id}`)
+  },
+
+  getStopsByRouteId: (routeId: number) => {
+    return request.get<Stop[]>(`/metro/stops/route/${routeId}`)
+  },
+
+  createStop: (stopDto: StopDto) => {
+    return request.post<Stop>('/metro/stops', stopDto)
+  },
+
+  updateStop: (id: number, stopDto: StopDto) => {
+    return request.put<Stop>(`/metro/stops/${id}`, stopDto)
+  },
+
+  deleteStop: (id: number) => {
+    return request.delete<boolean>(`/metro/stops/${id}`)
   }
 } 
