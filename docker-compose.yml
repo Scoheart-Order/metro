@@ -27,6 +27,8 @@ services:
       - metro-db
     environment:
       SPRING_PROFILES_ACTIVE: docker
+      MYSQL_USER: ${MYSQL_USER:-metro}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-metro}
 
   # Frontend Service with Development Server
   metro-fe:
