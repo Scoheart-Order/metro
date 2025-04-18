@@ -40,3 +40,6 @@ services:
     volumes:
       - ./metro-fe:/app
       - /app/node_modules
+
+volumes:
+  mysql-data:
