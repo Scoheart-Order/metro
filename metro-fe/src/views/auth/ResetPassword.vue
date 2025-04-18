@@ -2,7 +2,7 @@
   <div class="reset-password-container">
     <div class="reset-password-card">
       <div class="reset-password-header">
-        <img src="../../assets/logo.png" alt="Logo" class="logo" />
+        <img src="../../assets/user-icon.svg" alt="Logo" class="logo" />
         <h2>重置密码</h2>
       </div>
       
