@@ -5,9 +5,9 @@ server:
 
 spring:
   datasource:
-    url: jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: ${MYSQL_USER:metro}
-    password: ${MYSQL_PASSWORD:metro}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${SPRING_DATASOURCE_USERNAME:metro}
+    password: ${SPRING_DATASOURCE_PASSWORD:metro}
     driver-class-name: com.mysql.cj.jdbc.Driver
   security:
     user:

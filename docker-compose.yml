@@ -27,8 +27,9 @@ services:
       - metro-db
     environment:
       SPRING_PROFILES_ACTIVE: docker
-      MYSQL_USER: ${MYSQL_USER:-metro}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-metro}
+      SPRING_DATASOURCE_URL: jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: metro
+      SPRING_DATASOURCE_PASSWORD: metro
 
   # Frontend Service with Development Server
   metro-fe:
