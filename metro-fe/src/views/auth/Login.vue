@@ -128,7 +128,7 @@ const handleLogin = async () => {
     loading.value = true
     
     try {
-      let success
+      let success = false
       
       // Determine login method based on input type
       if (isPhoneNumber.value) {
@@ -145,37 +145,34 @@ const handleLogin = async () => {
         success = await userStore.login(loginDto)
       }
       
-      if (success) {
-        ElMessage.success('登录成功')
-        
-        // Store credentials if "remember me" is checked
-        if (rememberMe.value) {
-          localStorage.setItem('rememberedUser', loginForm.account)
-        } else {
-          localStorage.removeItem('rememberedUser')
-        }
-        
-        // Make sure user profile is fully loaded before redirecting
-        if (!userStore.user) {
-          await userStore.fetchProfile()
-        }
-        
-        // Double-check that user data is available before redirecting
-        if (userStore.user) {
-          // Redirect based on user role using the homeRoute getter
-          router.push(userStore.homeRoute)
-          console.log(`User logged in successfully. Redirecting to ${userStore.homeRoute}`)
-        } else {
-          // If user data is still not available, go to home page
-          router.push('/')
-          console.error('Failed to load user profile after login')
-        }
+      // 登录成功处理
+      ElMessage.success('登录成功')
+      
+      // Store credentials if "remember me" is checked
+      if (rememberMe.value) {
+        localStorage.setItem('rememberedUser', loginForm.account)
       } else {
-        ElMessage.error('登录失败，请检查账号和密码')
+        localStorage.removeItem('rememberedUser')
+      }
+      
+      // Make sure user profile is fully loaded before redirecting
+      if (!userStore.user) {
+        await userStore.fetchProfile()
+      }
+      
+      // Double-check that user data is available before redirecting
+      if (userStore.user) {
+        // Redirect based on user role using the homeRoute getter
+        router.push(userStore.homeRoute)
+        console.log(`User logged in successfully. Redirecting to ${userStore.homeRoute}`)
+      } else {
+        // If user data is still not available, go to home page
+        router.push('/')
+        console.error('Failed to load user profile after login')
       }
     } catch (error) {
       console.error('Login error:', error)
-      ElMessage.error('登录时发生错误')
+      // 登录错误已由请求拦截器处理，此处不再显示额外消息
     } finally {
       loading.value = false
     }

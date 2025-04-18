@@ -40,8 +40,8 @@
 import { ref, computed, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { useRouter } from 'vue-router';
-import { useMetroStore } from '../../stores/metro';
-import type { Route } from '../../api/modules/metro';
+import { useMetroStore } from '@/stores/metro';
+import type { Route } from '@/api/modules/metro';
 
 const metroStore = useMetroStore();
 const router = useRouter();

@@ -132,8 +132,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { useFeedbackStore } from '../../stores/feedback';
-import { useUserStore } from '../../stores/user';
+import { useFeedbackStore } from '@/stores/feedback';
+import { useUserStore } from '@/stores/user';
 import type { FormInstance } from 'element-plus';
 
 const userStore = useUserStore();

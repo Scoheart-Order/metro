@@ -110,8 +110,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useTrainStore } from '../stores/train';
-import { useAnnouncementStore } from '../stores/announcement';
+import { useTrainStore } from '@/stores/train';
+import { useAnnouncementStore } from '@/stores/announcement';
 import { ElMessage } from 'element-plus';
 
 const router = useRouter();

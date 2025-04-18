@@ -16,7 +16,6 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8080',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
         configure: (proxy, options) => {
           // 代理请求开始
           proxy.on('proxyReq', (proxyReq, req, res) => {

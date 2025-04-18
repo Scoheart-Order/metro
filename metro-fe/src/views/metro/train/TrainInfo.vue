@@ -148,8 +148,8 @@
 <script setup lang="ts">
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import { metroApi } from '../../api/modules/metro';
-import type { Line, Route, Station, Stop } from '../../api/modules/metro';
+import { metroApi } from '@/api/modules/metro';
+import type { Line, Route, Station, Stop } from '@/api/modules/metro';
 
 // 数据状态
 const loading = ref(false);
