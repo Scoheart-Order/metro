@@ -27,3 +27,12 @@ jwt:
   secret: MetroSecretKey123!@#$%^&*()_+AABBCCDDEEFFGGHHIIJJKKLLaabbccddeeffgghhiijjkk
   expiration-milliseconds: 86400000 # 24小时
   refresh-expiration-milliseconds: 604800000 # 7天
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

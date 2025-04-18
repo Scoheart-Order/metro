@@ -45,7 +45,7 @@ services:
       SPRING_DATASOURCE_USERNAME: metro
       SPRING_DATASOURCE_PASSWORD: metro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health" , "||" , "curl", "-f", "http://localhost:8080"]
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api"]
       interval: 10s
       timeout: 5s
       retries: 5
