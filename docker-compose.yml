@@ -27,7 +27,7 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: docker
 
-  # Frontend Service
+  # Frontend Service with Development Server
   metro-fe:
     build:
       context: ./metro-fe
@@ -36,3 +36,6 @@ services:
       - '3333:3333'
     depends_on:
       - metro-be
+    volumes:
+      - ./metro-fe:/app
+      - /app/node_modules
