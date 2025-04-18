@@ -20,7 +20,7 @@ const apiBaseUrl = isDocker
 
 // Create axios instance
 const service = axios.create({
-  baseURL: apiBaseUrl || 'http://localhost:8080/api',
+  baseURL: apiBaseUrl || 'http://8.130.172.82:8080/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json'
