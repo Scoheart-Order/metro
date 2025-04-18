@@ -30,6 +30,8 @@ services:
   metro-be:
     build:
       context: ./metro-be
+      args:
+        - MAVEN_OPTS=-Dmaven.repo.local=/root/.m2/repository
     container_name: metro-be
     restart: always
     ports:
@@ -42,6 +44,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: metro
       SPRING_DATASOURCE_PASSWORD: metro
+    volumes:
+      - maven-repo:/root/.m2/repository
     networks:
       - metro-network
 
@@ -64,6 +68,8 @@ services:
 
 volumes:
   mysql-data:
+    driver: local
+  maven-repo:
     driver: local
 
 networks:

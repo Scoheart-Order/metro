@@ -10,16 +10,8 @@ export interface ApiResponse<T = any> {
   success: boolean;
 }
 
-// Determine if we're in a Docker environment (this can be set in your Docker container)
-const isDocker = import.meta.env.VITE_DOCKER_ENV === 'true';
-
-// Choose the appropriate base URL
-const apiBaseUrl = isDocker 
-  ? import.meta.env.VITE_API_BASE_URL_DOCKER 
-  : import.meta.env.VITE_API_BASE_URL;
-
 // Create axios instance
-const service = axios.create({
+const axiosInstance = axios.create({
   baseURL: '/api',
   timeout: 10000,
   headers: {
@@ -28,7 +20,7 @@ const service = axios.create({
 })
 
 // Request interceptor for API calls
-service.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   config => {
     const token = localStorage.getItem('token')
     if (token) {
@@ -42,7 +34,7 @@ service.interceptors.request.use(
 )
 
 // Response interceptor for API calls
-service.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   response => {
     // Extract the actual data from the response based on backend structure
     if (response.data && typeof response.data === 'object') {
@@ -99,20 +91,20 @@ service.interceptors.response.use(
 // Helper methods to better match backend response structure
 export const request = {
   get: <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    return service.get<ApiResponse<T>>(url, config).then(res => res.data.data)
+    return axiosInstance.get<ApiResponse<T>>(url, config).then(res => res.data.data)
   },
   
   post: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
-    return service.post<ApiResponse<T>>(url, data, config).then(res => res.data.data)
+    return axiosInstance.post<ApiResponse<T>>(url, data, config).then(res => res.data.data)
   },
   
   put: <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
-    return service.put<ApiResponse<T>>(url, data, config).then(res => res.data.data)
+    return axiosInstance.put<ApiResponse<T>>(url, data, config).then(res => res.data.data)
   },
   
   delete: <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => {
-    return service.delete<ApiResponse<T>>(url, config).then(res => res.data.data)
+    return axiosInstance.delete<ApiResponse<T>>(url, config).then(res => res.data.data)
   }
 }
 
-export default service 
+export default axiosInstance 
