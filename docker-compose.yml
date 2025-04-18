@@ -4,6 +4,8 @@ services:
   # Database Service
   metro-db:
     image: mysql:8.0
+    container_name: metro-db
+    restart: always
     ports:
       - '3306:3306'
     environment:
@@ -15,6 +17,12 @@ services:
       - mysql-data:/var/lib/mysql
       - ./metro-db/init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "metro", "-pmetro"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Backend Service
   metro-be:
@@ -24,7 +32,8 @@ services:
     ports:
       - '8080:8080'
     depends_on:
-      - metro-db
+      metro-db:
+        condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://metro-db:3306/metro?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
@@ -46,3 +55,4 @@ services:
 
 volumes:
   mysql-data:
+    driver: local
