@@ -1,4 +1,4 @@
-FROM node:22
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
@@ -13,11 +13,11 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Set environment to use Docker configuration
-ENV VITE_DOCKER_ENV=true
+# Build the application
+RUN npm run build
 
-# Expose development server port
+# Expose port 3333
 EXPOSE 3333
 
-# Start development server
-CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "3333"] 
+# Start the preview server on port 3333
+CMD ["npm", "run", "preview", "--", "--host", "0.0.0.0", "--port", "3333"] 
