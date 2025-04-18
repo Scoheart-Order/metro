@@ -14,7 +14,7 @@ export interface PhoneLoginDto {
 export interface RegisterDto {
   username: string
   password: string
-  email: string
+  email?: string
   phone: string
 }
 

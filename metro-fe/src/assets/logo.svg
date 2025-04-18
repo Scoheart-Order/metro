@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <circle cx="50" cy="50" r="45" fill="#1976D2" />
+  <text x="50" y="50" font-family="Arial, sans-serif" font-size="24" fill="white" text-anchor="middle" dominant-baseline="middle" font-weight="bold">METRO</text>
+  <path d="M20 65 L80 65" stroke="white" stroke-width="5" stroke-linecap="round" />
+  <path d="M30 40 L30 70" stroke="white" stroke-width="5" stroke-linecap="round" />
+  <path d="M70 40 L70 70" stroke="white" stroke-width="5" stroke-linecap="round" />
+</svg> 

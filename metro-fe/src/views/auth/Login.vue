@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-card">
       <div class="login-header">
-        <img src="../../assets/logo.png" alt="Logo" class="logo" />
+        <img src="../../assets/user-icon.svg" alt="Logo" class="logo" />
         <h2>用户登录</h2>
       </div>
       
