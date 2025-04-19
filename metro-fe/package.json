@@ -4,7 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host --open",
+    "dev": "cross-env LAUNCH_EDITOR=cursor vite --host --open",
     "build": "vite build",
     "preview": "vite preview"
   },
@@ -20,6 +20,7 @@
     "@types/node": "^22.14.1",
     "@vitejs/plugin-vue": "^5.2.2",
     "@vue/tsconfig": "^0.7.0",
+    "cross-env": "^7.0.3",
     "sass": "^1.86.3",
     "typescript": "~5.7.2",
     "vite": "^6.3.0",

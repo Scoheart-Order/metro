@@ -3,26 +3,14 @@ version: '3.8'
 services:
   # Database Service
   metro-db:
-    image: mysql:8.0
+    build:
+      context: ./metro-db
     container_name: metro-db
     restart: always
     ports:
       - '3306:3306'
-    environment:
-      - MYSQL_ROOT_PASSWORD=88888888
-      - MYSQL_DATABASE=metro
-      - MYSQL_USER=metro
-      - MYSQL_PASSWORD=metro
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./metro-db/init.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "metro", "-pmetro"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
     networks:
       - metro-network
 
