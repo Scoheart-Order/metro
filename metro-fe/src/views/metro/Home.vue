@@ -129,9 +129,11 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useAnnouncementStore } from '@/stores/announcement';
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
+import { useAnnouncementStore } from '../../stores/announcement';
+import metroBgImage from '@/assets/images/metro-bg.jpg';
 
 const announcementStore = useAnnouncementStore();
 
@@ -151,7 +153,7 @@ onMounted(async () => {
 .home-container {
   .hero-section {
     background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-      url('../assets/metro-bg.jpg');
+      v-bind('url(' + metroBgImage + ')');
     background-size: cover;
     background-position: center;
     color: white;

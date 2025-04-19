@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "cross-env LAUNCH_EDITOR=cursor vite --host --open",
     "build": "vite build",
+    "build:analyze": "cross-env ANALYZE=true vite build",
+    "build:prod": "vite build --mode production",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -22,9 +24,12 @@
     "@vitejs/plugin-vue": "^5.2.2",
     "@vue/tsconfig": "^0.7.0",
     "cross-env": "^7.0.3",
+    "rollup-plugin-visualizer": "^5.14.0",
     "sass": "^1.86.3",
+    "terser": "^5.39.0",
     "typescript": "~5.7.2",
     "vite": "^6.3.0",
+    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-vue-devtools": "^7.7.3",
     "vue-tsc": "^2.2.8"
   }

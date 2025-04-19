@@ -31,43 +31,43 @@ const routes = [
   // 前台页面路由 - metro模块
   {
     path: '/metro',
-    component: () => import('../views/metro/Layout.vue'),
+    component: () => import(/* webpackChunkName: "layout" */ '../views/metro/Layout.vue'),
     meta: { requiresAuth: false, title: '地铁系统' },
     children: [
       {
         path: '',
         name: 'MetroHome',
-        component: () => import('../views/metro/Home.vue'),
+        component: () => import(/* webpackChunkName: "metro-home" */ '../views/metro/Home.vue'),
         meta: { requiresAuth: false, title: '首页' },
       },
       {
         path: 'train-info',
         name: 'TrainInfo',
-        component: () => import('../views/metro/train/TrainInfo.vue'),
+        component: () => import(/* webpackChunkName: "train-info" */ '../views/metro/train/TrainInfo.vue'),
         meta: { requiresAuth: false, title: '车次信息' },
       },
       {
         path: 'route-info',
         name: 'RouteInfo',
-        component: () => import('../views/metro/train/RouteInfo.vue'),
+        component: () => import(/* webpackChunkName: "route-info" */ '../views/metro/train/RouteInfo.vue'),
         meta: { requiresAuth: false, title: '路线信息' },
       },
       {
         path: 'feedback',
         name: 'Feedback',
-        component: () => import('../views/metro/feedback/Feedback.vue'),
+        component: () => import(/* webpackChunkName: "feedback" */ '../views/metro/feedback/Feedback.vue'),
         meta: { requiresAuth: false, title: '反馈' },
       },
       {
         path: 'request',
         name: 'Request',
-        component: () => import('../views/metro/feedback/Request.vue'),
+        component: () => import(/* webpackChunkName: "request" */ '../views/metro/feedback/Request.vue'),
         meta: { requiresAuth: true, title: '需求提交' },
       },
       {
         path: 'profile',
         name: 'Profile',
-        component: () => import('../views/metro/user/Profile.vue'),
+        component: () => import(/* webpackChunkName: "profile" */ '../views/metro/user/Profile.vue'),
         meta: { requiresAuth: true, title: '个人中心' },
       },
     ],
@@ -76,7 +76,7 @@ const routes = [
   // 管理后台路由 - admin模块
   {
     path: '/admin',
-    component: () => import('../views/admin/AdminLayout.vue'),
+    component: () => import(/* webpackChunkName: "admin-layout" */ '../views/admin/AdminLayout.vue'),
     meta: {
       requiresAuth: true,
       requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -86,7 +86,7 @@ const routes = [
       {
         path: '',
         name: 'AdminDashboard',
-        component: () => import('../views/admin/AdminHome.vue'),
+        component: () => import(/* webpackChunkName: "admin-home" */ '../views/admin/AdminHome.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -96,7 +96,7 @@ const routes = [
       {
         path: 'line-management',
         name: 'LineManagement',
-        component: () => import('../views/admin/LineManagement.vue'),
+        component: () => import(/* webpackChunkName: "line-management" */ '../views/admin/LineManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -106,7 +106,7 @@ const routes = [
       {
         path: 'station-management',
         name: 'StationManagement',
-        component: () => import('../views/admin/StationManagement.vue'),
+        component: () => import(/* webpackChunkName: "station-management" */ '../views/admin/StationManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -116,7 +116,7 @@ const routes = [
       {
         path: 'route-management',
         name: 'RouteManagement',
-        component: () => import('../views/admin/RouteManagement.vue'),
+        component: () => import(/* webpackChunkName: "route-management" */ '../views/admin/RouteManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -126,7 +126,7 @@ const routes = [
       {
         path: 'stop-management',
         name: 'StopManagement',
-        component: () => import('../views/admin/StopManagement.vue'),
+        component: () => import(/* webpackChunkName: "stop-management" */ '../views/admin/StopManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -136,7 +136,7 @@ const routes = [
       {
         path: 'feedback-management',
         name: 'FeedbackManagement',
-        component: () => import('../views/admin/FeedbackManagement.vue'),
+        component: () => import(/* webpackChunkName: "feedback-management" */ '../views/admin/FeedbackManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -146,7 +146,7 @@ const routes = [
       {
         path: 'request-management',
         name: 'RequestManagement',
-        component: () => import('../views/admin/RequestManagement.vue'),
+        component: () => import(/* webpackChunkName: "request-management" */ '../views/admin/RequestManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -156,7 +156,7 @@ const routes = [
       {
         path: 'announcement-management',
         name: 'AnnouncementManagement',
-        component: () => import('../views/admin/AnnouncementManagement.vue'),
+        component: () => import(/* webpackChunkName: "announcement-management" */ '../views/admin/AnnouncementManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -166,7 +166,7 @@ const routes = [
       {
         path: 'train-trip-management',
         name: 'TrainTripManagement',
-        component: () => import('../views/admin/TrainTripManagement.vue'),
+        component: () => import(/* webpackChunkName: "train-trip-management" */ '../views/admin/TrainTripManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -176,7 +176,7 @@ const routes = [
       {
         path: 'stop-time-management/:id',
         name: 'StopTimeManagement',
-        component: () => import('../views/admin/StopTimeManagement.vue'),
+        component: () => import(/* webpackChunkName: "stop-time-management" */ '../views/admin/StopTimeManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
@@ -189,7 +189,7 @@ const routes = [
   // 超级管理员路由 - superadmin模块
   {
     path: '/superadmin',
-    component: () => import('../views/superadmin/SuperAdminLayout.vue'),
+    component: () => import(/* webpackChunkName: "superadmin-layout" */ '../views/superadmin/SuperAdminLayout.vue'),
     meta: {
       requiresAuth: true,
       requiredRoles: [ROLE_NAMES.SUPER_ADMIN],
@@ -205,7 +205,7 @@ const routes = [
       {
         path: 'user-management',
         name: 'SuperAdminUserManagement',
-        component: () => import('../views/superadmin/UserManagement.vue'),
+        component: () => import(/* webpackChunkName: "user-management" */ '../views/superadmin/UserManagement.vue'),
         meta: {
           requiresAuth: true,
           requiredRoles: [ROLE_NAMES.SUPER_ADMIN],
@@ -219,13 +219,13 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: () => import('../views/auth/Login.vue'),
+    component: () => import(/* webpackChunkName: "login" */ '../views/auth/Login.vue'),
     meta: { requiresAuth: false, title: '登录' },
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import('../views/auth/Register.vue'),
+    component: () => import(/* webpackChunkName: "register" */ '../views/auth/Register.vue'),
     meta: { requiresAuth: false, title: '注册' },
   },
 
@@ -239,7 +239,7 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
-    component: () => import('../views/NotFound.vue'),
+    component: () => import(/* webpackChunkName: "not-found" */ '../views/NotFound.vue'),
     meta: { requiresAuth: false, title: '404 Not Found' },
   },
 ];

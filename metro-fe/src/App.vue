@@ -1,9 +1,20 @@
 <script setup lang="ts">
-// No additional initialization needed anymore
+import { provide } from 'vue';
+import { useRouter } from 'vue-router';
+
+// Provide router to components
+const router = useRouter();
+provide('router', router);
 </script>
 
 <template>
-  <router-view />
+  <router-view v-slot="{ Component }">
+    <transition name="fade" mode="out-in">
+      <keep-alive>
+        <component :is="Component" />
+      </keep-alive>
+    </transition>
+  </router-view>
 </template>
 
 <style>
@@ -18,5 +29,16 @@ body {
 
 #app {
   min-height: 100vh;
+}
+
+/* Fade transition for route changes */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 </style>
