@@ -8,7 +8,7 @@ ENV MYSQL_PASSWORD=metro
 
 # Copy initialization SQL scripts
 COPY ./init.sql /docker-entrypoint-initdb.d/
-COPY ./mock-data.sql /docker-entrypoint-initdb.d/
+COPY ./data.sql /docker-entrypoint-initdb.d/
 
 # Set default character set and collation
 CMD ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]

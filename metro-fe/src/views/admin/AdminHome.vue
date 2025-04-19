@@ -12,7 +12,7 @@
                 <i class="el-icon-train"></i>
               </div>
               <div class="stat-card-data">
-                <div class="stat-card-value">{{ stats.trainCount }}</div>
+                <div class="stat-card-value">{{ stats.stationCount }}</div>
                 <div class="stat-card-label">站点数量</div>
               </div>
             </div>
@@ -145,16 +145,19 @@
 import { ref, onMounted } from 'vue';
 import { useUserStore } from '../../stores/user';
 import { useTrainStore } from '../../stores/train';
+import { useMetroStore } from '../../stores/metro';
 import { useFeedbackStore } from '../../stores/feedback';
 import { ElMessage } from 'element-plus';
 
 const userStore = useUserStore();
 const trainStore = useTrainStore();
+const metroStore = useMetroStore();
 const feedbackStore = useFeedbackStore();
 
 // Mock statistics data
 const stats = ref({
   trainCount: 0,
+  stationCount: 0,
   routeCount: 0,
   feedbackCount: 0,
   requestCount: 0,
@@ -214,6 +217,8 @@ const loadDashboardData = async () => {
     // Load trains and routes
     await trainStore.fetchTrains();
     await trainStore.fetchRoutes();
+    // Fetch stations using metroStore
+    await metroStore.fetchStations();
 
     // Load feedback and requests
     await feedbackStore.fetchFeedbacks();
@@ -222,6 +227,7 @@ const loadDashboardData = async () => {
     // Update statistics
     stats.value = {
       trainCount: trainStore.trains.length,
+      stationCount: metroStore.stations.length,
       routeCount: trainStore.routes.length,
       feedbackCount: feedbackStore.feedbacks.filter(
         (f) => !f.replies || f.replies.length === 0
