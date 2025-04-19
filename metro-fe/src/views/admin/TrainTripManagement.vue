@@ -441,7 +441,7 @@ const submitForm = async () => {
 
       try {
         // 处理日期格式
-        if (trainTripForm.runDate instanceof Date) {
+        if (typeof trainTripForm.runDate !== 'string' && trainTripForm.runDate && 'toISOString' in Object(trainTripForm.runDate)) {
           trainTripForm.runDate = format(trainTripForm.runDate, 'yyyy-MM-dd');
         }
 

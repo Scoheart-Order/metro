@@ -1,9 +1,48 @@
 <template>
   <div class="stop-management-container">
-    <h1 class="page-title">停靠点管理</h1>
+    <h1 class="page-title">停站管理</h1>
+
+    <div class="control-panel">
+      <div class="filter-group">
+        <el-select
+          v-model="lineFilter"
+          placeholder="选择线路"
+          clearable
+          @clear="handleLineFilterClear"
+          @change="handleLineFilterChange"
+        >
+          <el-option
+            v-for="line in metroStore.lines"
+            :key="line.id"
+            :label="line.name"
+            :value="line.id"
+          >
+            <div class="line-option">
+              <div
+                class="color-badge"
+                :style="{ backgroundColor: line.color }"
+              ></div>
+              <span>{{ line.name }}</span>
+            </div>
+          </el-option>
+        </el-select>
+
+        <el-input
+          v-model="searchQuery"
+          placeholder="搜索方向名称"
+          class="search-input"
+          clearable
+          @clear="handleSearchClear"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+      </div>
+    </div>
 
     <el-table
-      :data="metroStore.routes"
+      :data="filteredRoutes.data"
       style="width: 100%"
       v-loading="loading"
     >
@@ -42,6 +81,17 @@
         </template>
       </el-table-column>
     </el-table>
+
+    <el-pagination
+      v-model:current-page="currentPage"
+      v-model:page-size="pageSize"
+      :page-sizes="[10, 20, 50]"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="totalRoutes"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+      class="pagination"
+    />
 
     <!-- 停靠点管理对话框 -->
     <el-dialog v-model="stopsDialogVisible" title="停靠点管理" width="60%">
@@ -130,13 +180,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, reactive, onMounted, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
+import { Search, Plus } from '@element-plus/icons-vue';
 import type { FormInstance } from 'element-plus';
-import { Plus } from '@element-plus/icons-vue';
 import { useMetroStore } from '../../stores/metro';
 import { metroApi } from '../../api/modules/metro';
-import type { Route, Stop, StopDto } from '../../api/modules/metro';
+import type { Route, Stop, StopDto, Station } from '../../api/modules/metro';
 
 // 定义组件内部使用的Stop接口，包含额外字段
 interface StopDisplay extends Stop {
@@ -153,6 +203,10 @@ const selectedRoute = ref<Route | null>(null);
 const routeStops = ref<StopDisplay[]>([]);
 const stopsLoading = ref(false);
 const isEditMode = ref(false);
+const lineFilter = ref<number | null>(null);
+const searchQuery = ref('');
+const currentPage = ref(1);
+const pageSize = ref(10);
 
 // 停靠点表单
 const stopForm = ref<StopDto>({
@@ -164,6 +218,40 @@ const stopRules = {
   stationId: [{ required: true, message: '请选择站点', trigger: 'change' }],
 };
 const stopFormRef = ref<FormInstance | null>(null);
+
+// 过滤后的路线数据
+const filteredRoutes = computed(() => {
+  let filtered = metroStore.routes;
+
+  // 按线路筛选
+  if (lineFilter.value) {
+    filtered = filtered.filter((route) => route.lineId === lineFilter.value);
+  }
+
+  // 按搜索筛选
+  if (searchQuery.value) {
+    filtered = filtered.filter((route) =>
+      route.name.toLowerCase().includes(searchQuery.value.toLowerCase())
+    );
+  }
+
+  // 计算总数
+  const totalFilteredRoutes = filtered.length;
+
+  // 应用分页
+  filtered = filtered.slice(
+    (currentPage.value - 1) * pageSize.value,
+    currentPage.value * pageSize.value
+  );
+
+  return {
+    data: filtered,
+    total: totalFilteredRoutes,
+  };
+});
+
+// 路线总数
+const totalRoutes = computed(() => filteredRoutes.value.total);
 
 // 可选站点列表 - 排除已添加的站点、起始站和终点站
 const availableStations = computed(() => {
@@ -189,6 +277,14 @@ onMounted(async () => {
     metroStore.fetchRoutes(),
   ]);
   loading.value = false;
+});
+
+// 监听线路过滤器变化
+watch(lineFilter, async (newValue) => {
+  if (newValue !== null) {
+    await metroStore.fetchRoutesByLineId(newValue);
+  }
+  currentPage.value = 1;
 });
 
 // 获取线路颜色
@@ -251,6 +347,30 @@ const fetchRouteStops = async (routeId: number) => {
   }
 };
 
+// 过滤器方法
+const handleLineFilterClear = () => {
+  lineFilter.value = null;
+  currentPage.value = 1;
+};
+
+const handleLineFilterChange = () => {
+  currentPage.value = 1;
+};
+
+const handleSearchClear = () => {
+  searchQuery.value = '';
+  currentPage.value = 1;
+};
+
+const handleSizeChange = (size: number) => {
+  pageSize.value = size;
+  currentPage.value = 1;
+};
+
+const handleCurrentChange = (page: number) => {
+  currentPage.value = page;
+};
+
 // 打开停靠点管理对话框
 const handleManageStops = async (row: Route) => {
   selectedRoute.value = row;
@@ -273,26 +393,29 @@ const openAddStopDialog = () => {
 };
 
 // 删除停靠点
-const handleDeleteStop = (row: StopDisplay) => {
-  ElMessageBox.confirm(`确定要删除 ${row.stationName} 停靠点吗？`, '确认删除', {
-    confirmButtonText: '确定',
-    cancelButtonText: '取消',
-    type: 'warning',
-  })
+const handleDeleteStop = (stop: StopDisplay) => {
+  ElMessageBox.confirm(
+    `确定要删除停靠点 ${stop.stationName} 吗？`,
+    '确认删除',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
     .then(async () => {
+      stopsLoading.value = true;
       try {
-        stopsLoading.value = true;
-        
-        // 先删除停靠点
-        await metroApi.deleteStop(row.id);
-        
-        // 从前端数组中移除已删除的停靠点
-        routeStops.value = routeStops.value.filter(stop => stop.id !== row.id);
-        
-        // 重新排序并更新后端
-        await updateStopSequences();
-        
-        ElMessage.success('停靠点删除成功');
+        const success = await metroApi.deleteStop(stop.id);
+        if (success) {
+          ElMessage.success('停靠点删除成功');
+          // 重新加载停靠点列表
+          if (selectedRoute.value) {
+            await fetchRouteStops(selectedRoute.value.id);
+          }
+        } else {
+          ElMessage.error('停靠点删除失败');
+        }
       } catch (error) {
         console.error('删除停靠点失败', error);
         ElMessage.error('删除停靠点失败');
@@ -303,115 +426,6 @@ const handleDeleteStop = (row: StopDisplay) => {
     .catch(() => {
       // 取消删除操作
     });
-};
-
-// 添加一个新方法用于更新停靠点序号
-const updateStopSequences = async () => {
-  try {
-    // 先对停靠点进行排序
-    routeStops.value.sort((a, b) => a.seq - b.seq);
-    
-    // 更新序号
-    const updatePromises = routeStops.value.map((stop, index) => {
-      const newSeq = index + 1;
-      
-      // 只有当序号变化时才更新
-      if (stop.seq !== newSeq) {
-        stop.seq = newSeq;
-        
-        // 创建更新对象
-        const updateData = {
-          id: stop.id,
-          routeId: stop.routeId,
-          stationId: stop.stationId,
-          seq: newSeq
-        };
-        
-        // 返回更新操作的Promise
-        return metroApi.updateStop(stop.id, updateData);
-      }
-      
-      // 如果序号没变，返回一个已解决的Promise
-      return Promise.resolve();
-    });
-    
-    // 等待所有更新完成
-    await Promise.all(updatePromises);
-  } catch (error) {
-    console.error('更新停靠点序号失败', error);
-    ElMessage.error('更新停靠点序号失败');
-  }
-};
-
-// 提交添加停靠点表单
-const submitStopForm = async () => {
-  if (!stopFormRef.value || !selectedRoute.value) return;
-
-  try {
-    await stopFormRef.value.validate(async (valid: boolean) => {
-      if (valid) {
-        stopsLoading.value = true;
-        const station = metroStore.getStationById(stopForm.value.stationId);
-        
-        if (!station) {
-          ElMessage.error('所选站点不存在');
-          stopsLoading.value = false;
-          return;
-        }
-
-        try {
-          const formattedData = {
-            ...stopForm.value
-          };
-          
-          let newStop;
-          
-          if (isEditMode.value && formattedData.id) {
-            // 编辑模式 - 保持原有序号
-            newStop = await metroApi.updateStop(formattedData.id, formattedData);
-            
-            const index = routeStops.value.findIndex(stop => stop.id === formattedData.id);
-            if (index !== -1) {
-              routeStops.value[index] = {
-                ...newStop,
-                stationName: station.name,
-                stationCode: station.code || '',
-              };
-            }
-            
-            ElMessage.success('停靠点更新成功');
-          } else {
-            // 添加模式 - 自动设置为最后一个序号
-            formattedData.seq = routeStops.value.length + 1;
-            newStop = await metroApi.createStop(formattedData);
-            
-            const newStopData: StopDisplay = {
-              ...newStop,
-              stationName: station.name,
-              stationCode: station.code || '',
-            };
-            
-            routeStops.value.push(newStopData);
-            ElMessage.success('停靠点添加成功');
-          }
-          
-          // 重新排序显示
-          routeStops.value.sort((a, b) => a.seq - b.seq);
-          addStopDialogVisible.value = false;
-        } catch (error) {
-          console.error('保存停靠点数据失败', error);
-          ElMessage.error('保存停靠点数据失败');
-        }
-      } else {
-        ElMessage.error('表单验证失败');
-      }
-    });
-  } catch (error) {
-    console.error('保存停靠点数据失败', error);
-    ElMessage.error('保存停靠点数据失败');
-  } finally {
-    stopsLoading.value = false;
-  }
 };
 
 // 打开编辑停靠点对话框
@@ -427,6 +441,60 @@ const handleEditStop = (row: StopDisplay) => {
   isEditMode.value = true;
   addStopDialogVisible.value = true;
 };
+
+// 提交停靠点表单
+const submitStopForm = async () => {
+  if (!stopFormRef.value) return;
+
+  try {
+    stopsLoading.value = true;
+    
+    await stopFormRef.value.validate(async (valid) => {
+      if (valid) {
+        try {
+          if (isEditMode.value && stopForm.value.id !== null) {
+            const success = await metroApi.updateStop(
+              stopForm.value.id as number,
+              stopForm.value
+            );
+            if (success) {
+              ElMessage.success('停靠点更新成功');
+              addStopDialogVisible.value = false;
+              // 重新加载停靠点列表
+              if (selectedRoute.value) {
+                await fetchRouteStops(selectedRoute.value.id);
+              }
+            } else {
+              ElMessage.error('停靠点更新失败');
+            }
+          } else {
+            const newStop = await metroApi.createStop(stopForm.value);
+            if (newStop) {
+              ElMessage.success('停靠点添加成功');
+              addStopDialogVisible.value = false;
+              // 重新加载停靠点列表
+              if (selectedRoute.value) {
+                await fetchRouteStops(selectedRoute.value.id);
+              }
+            } else {
+              ElMessage.error('停靠点添加失败');
+            }
+          }
+        } catch (error) {
+          console.error('保存停靠点数据失败', error);
+          ElMessage.error('保存停靠点数据失败');
+        }
+      } else {
+        ElMessage.error('表单验证失败');
+      }
+    });
+  } catch (error) {
+    console.error('保存停靠点数据失败', error);
+    ElMessage.error('保存停靠点数据失败');
+  } finally {
+    stopsLoading.value = false;
+  }
+};
 </script>
 
 <style scoped>
@@ -438,6 +506,27 @@ const handleEditStop = (row: StopDisplay) => {
   margin-bottom: 20px;
   font-size: 24px;
   color: #303133;
+}
+
+.control-panel {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.filter-group {
+  display: flex;
+  gap: 10px;
+}
+
+.search-input {
+  width: 250px;
+}
+
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .line-option {
