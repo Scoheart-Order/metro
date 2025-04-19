@@ -47,6 +47,7 @@
           type="date"
           placeholder="选择日期"
           format="YYYY-MM-DD"
+          value-format="YYYY-MM-DD"
           clearable
           @clear="handleDateFilterClear"
         />
@@ -61,18 +62,20 @@
       :data="filteredTrainTrips.data"
       style="width: 100%"
       v-loading="loading"
+      empty-text="暂无列车行程数据"
     >
-      <el-table-column prop="id" label="ID" width="80" />
+      <el-table-column prop="id" label="ID" width="80" sortable />
       <el-table-column prop="trainNumber" label="列车车次" width="120" />
       <el-table-column label="所属线路" width="150">
         <template #default="scope">
-          <div class="line-option">
+          <div class="line-option" v-if="getRouteLineId(scope.row.routeId)">
             <div
               class="color-badge"
               :style="{ backgroundColor: getLineColor(getRouteLineId(scope.row.routeId)) }"
             ></div>
             <span>{{ getLineName(getRouteLineId(scope.row.routeId)) }}</span>
           </div>
+          <span v-else>未知线路</span>
         </template>
       </el-table-column>
       <el-table-column label="行驶方向" width="200">
@@ -80,7 +83,7 @@
           {{ getRouteName(scope.row.routeId) }}
         </template>
       </el-table-column>
-      <el-table-column label="运行日期" width="120">
+      <el-table-column label="运行日期" width="120" sortable>
         <template #default="scope">
           {{ formatDate(scope.row.runDate) }}
         </template>
@@ -91,16 +94,23 @@
             size="small"
             type="primary"
             @click="navigateToStopTimes(scope.row)"
+            title="管理列车的到站时刻表"
           >
             时刻表
           </el-button>
-          <el-button size="small" type="info" @click="handleEdit(scope.row)">
+          <el-button 
+            size="small" 
+            type="info" 
+            @click="handleEdit(scope.row)"
+            title="编辑列车行程信息"
+          >
             编辑
           </el-button>
           <el-button
             size="small"
             type="danger"
             @click="handleDelete(scope.row)"
+            title="删除列车行程"
           >
             删除
           </el-button>
@@ -124,6 +134,7 @@
       v-model="dialogVisible"
       :title="isEdit ? '编辑列车行程' : '添加列车行程'"
       width="50%"
+      destroy-on-close
     >
       <el-form
         :model="trainTripForm"
@@ -173,6 +184,8 @@
           <el-input
             v-model="trainTripForm.trainNumber"
             placeholder="例如：G101"
+            maxlength="20"
+            show-word-limit
           />
         </el-form-item>
         <el-form-item label="运行日期" prop="runDate">
@@ -181,6 +194,7 @@
             type="date"
             placeholder="选择运行日期"
             format="YYYY-MM-DD"
+            value-format="YYYY-MM-DD"
             style="width: 100%"
           />
         </el-form-item>
@@ -198,7 +212,7 @@
 <script setup lang="ts">
 import { ref, computed, reactive, onMounted, watch } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search, Plus } from '@element-plus/icons-vue';
+import { Plus } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
 import type { FormInstance } from 'element-plus';
 import { useMetroStore } from '../../stores/metro';
@@ -212,7 +226,7 @@ const metroStore = useMetroStore();
 const loading = ref(true);
 const lineFilter = ref<number | null>(null);
 const routeFilter = ref<number | null>(null);
-const dateFilter = ref<Date | null>(null);
+const dateFilter = ref<string | null>(null);
 const currentPage = ref(1);
 const pageSize = ref(10);
 
@@ -224,7 +238,8 @@ const filteredRoutes = computed(() => {
 
 // 分页和过滤后的行程数据
 const filteredTrainTrips = computed(() => {
-  let filtered = metroStore.trainTrips;
+  // 先过滤掉routeId为null或undefined的行程
+  let filtered = metroStore.trainTrips.filter(trip => trip.routeId != null);
 
   // 按线路筛选
   if (lineFilter.value) {
@@ -241,10 +256,9 @@ const filteredTrainTrips = computed(() => {
 
   // 按日期筛选
   if (dateFilter.value) {
-    const dateStr = format(dateFilter.value, 'yyyy-MM-dd');
     filtered = filtered.filter((trip) => {
       const tripDate = trip.runDate ? trip.runDate.substring(0, 10) : '';
-      return tripDate === dateStr;
+      return tripDate === dateFilter.value;
     });
   }
 
@@ -296,7 +310,7 @@ onMounted(async () => {
     // 先加载线路数据
     await metroStore.fetchLines();
     
-    // 然后加载路线数据，确保所有线路的路线都被加载
+    // 然后加载路线数据
     await metroStore.fetchRoutes();
     
     // 最后加载行程数据
@@ -312,8 +326,12 @@ onMounted(async () => {
 // 监听线路过滤器变化
 watch(lineFilter, async (newValue) => {
   if (newValue !== null) {
-    await metroStore.fetchRoutesByLineId(newValue);
+    // 如果之前没有加载过该线路的路线，则加载
+    if (filteredRoutes.value.length === 0) {
+      await metroStore.fetchRoutesByLineId(newValue);
+    }
   }
+  // 重置路线过滤器
   routeFilter.value = null;
 });
 
@@ -335,13 +353,12 @@ const getRouteName = (routeId: number) => {
   return route ? route.name : '未知方向';
 };
 
-const getRouteLineId = (routeId: number) => {
-  const route = metroStore.routes.find((r) => r.id === routeId);
-  if (!route) {
-    console.warn(`未找到ID为${routeId}的路线`);
+const getRouteLineId = (routeId: number | null | undefined) => {
+  if (routeId === null || routeId === undefined) {
     return null;
   }
-  return route.lineId;
+  const route = metroStore.routes.find((r) => r.id === routeId);
+  return route ? route.lineId : null;
 };
 
 const formatDate = (dateStr: string) => {
@@ -388,6 +405,7 @@ const handleCurrentChange = (page: number) => {
 const handleFormLineChange = async (lineId: number) => {
   trainTripForm.routeId = 0;
   if (lineId) {
+    // 如果之前没有加载过该线路的路线，则加载
     await metroStore.fetchRoutesByLineId(lineId);
     formRoutes.value = metroStore.routes.filter((r) => r.lineId === lineId);
   } else {
@@ -440,11 +458,6 @@ const submitForm = async () => {
       loading.value = true;
 
       try {
-        // 处理日期格式
-        if (typeof trainTripForm.runDate !== 'string' && trainTripForm.runDate && 'toISOString' in Object(trainTripForm.runDate)) {
-          trainTripForm.runDate = format(trainTripForm.runDate, 'yyyy-MM-dd');
-        }
-
         if (isEdit.value && trainTripForm.id !== null) {
           const updatedTrainTrip = await metroStore.updateTrainTrip(
             trainTripForm.id as number,

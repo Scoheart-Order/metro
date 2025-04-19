@@ -8,13 +8,14 @@
           {{ trainTrip.trainNumber }}
         </el-descriptions-item>
         <el-descriptions-item label="所属线路">
-          <div class="line-badge">
+          <div class="line-badge" v-if="trainTrip.routeId && getRouteLineId(trainTrip.routeId)">
             <div
               class="color-badge"
               :style="{ backgroundColor: getLineColor(getRouteLineId(trainTrip.routeId)) }"
             ></div>
             <span>{{ getLineName(getRouteLineId(trainTrip.routeId)) }}</span>
           </div>
+          <span v-else>未知线路</span>
         </el-descriptions-item>
         <el-descriptions-item label="行驶方向">
           {{ getRouteName(trainTrip.routeId) }}
@@ -27,7 +28,7 @@
 
     <div class="control-panel">
       <div class="buttons">
-        <el-button type="primary" @click="openAddDialog" :disabled="!routeStops.length">
+        <el-button type="primary" @click="openAddDialog" :disabled="!routeStops.length || !availableStops.length">
           <el-icon><Plus /></el-icon>添加时刻
         </el-button>
         <el-button @click="goBack">
@@ -40,6 +41,7 @@
       :data="sortedStopTimes"
       style="width: 100%"
       v-loading="loading"
+      empty-text="暂无时刻表数据"
     >
       <el-table-column prop="stopSeq" label="顺序" width="80" sortable />
       <el-table-column label="停靠站" min-width="180">
@@ -59,13 +61,14 @@
       </el-table-column>
       <el-table-column label="操作" width="200">
         <template #default="scope">
-          <el-button size="small" type="primary" @click="handleEdit(scope.row)">
+          <el-button size="small" type="primary" @click="handleEdit(scope.row)" title="编辑时刻">
             编辑
           </el-button>
           <el-button
             size="small"
             type="danger"
             @click="handleDelete(scope.row)"
+            title="删除时刻"
           >
             删除
           </el-button>
@@ -78,6 +81,7 @@
       v-model="dialogVisible"
       :title="isEdit ? '编辑时刻' : '添加时刻'"
       width="50%"
+      destroy-on-close
     >
       <el-form
         :model="stopTimeForm"
@@ -109,6 +113,7 @@
           <el-time-picker
             v-model="stopTimeForm.arrivalTime"
             format="HH:mm:ss"
+            value-format="HH:mm:ss"
             placeholder="选择到站时间"
             style="width: 100%"
           />
@@ -117,6 +122,7 @@
           <el-time-picker
             v-model="stopTimeForm.departureTime"
             format="HH:mm:ss"
+            value-format="HH:mm:ss"
             placeholder="选择发车时间"
             style="width: 100%"
           />
@@ -242,6 +248,13 @@ const loadTrainTripData = async () => {
   // 确保线路数据已加载
   await metroStore.fetchLines();
   
+  // 检查routeId是否有效
+  if (!trainTrip.value.routeId) {
+    ElMessage.error('行程没有关联有效的路线');
+    goBack();
+    return;
+  }
+  
   // 加载路线数据
   const route = await metroStore.fetchRouteById(trainTrip.value.routeId);
   if (!route) {
@@ -258,33 +271,37 @@ const loadTrainTripData = async () => {
 };
 
 // 辅助方法
-const getLineColor = (lineId: number) => {
+const getLineColor = (lineId: number | null) => {
+  if (lineId === null) return '#909399';
   const line = metroStore.lines.find((l) => l.id === lineId);
   return line ? line.color : '#909399';
 };
 
-const getLineName = (lineId: number) => {
+const getLineName = (lineId: number | null) => {
+  if (lineId === null) return '未知线路';
   const line = metroStore.lines.find((l) => l.id === lineId);
-  return line ? line.name : '';
+  return line ? line.name : '未知线路';
 };
 
-const getRouteName = (routeId: number) => {
+const getRouteName = (routeId: number | null) => {
+  if (routeId === null) return '未知方向';
   const route = metroStore.routes.find((r) => r.id === routeId);
-  return route ? route.name : '';
+  return route ? route.name : '未知方向';
 };
 
-const getRouteLineId = (routeId: number) => {
+const getRouteLineId = (routeId: number | null) => {
+  if (routeId === null) return null;
   const route = metroStore.routes.find((r) => r.id === routeId);
-  return route ? route.lineId : 0;
+  return route ? route.lineId : null;
 };
 
 const getStopStationName = (stopId: number) => {
   const stop = routeStops.value.find(s => s.id === stopId);
   if (stop) {
     const station = metroStore.stations.find(s => s.id === stop.stationId);
-    return station ? station.name : '';
+    return station ? station.name : '未知站点';
   }
-  return '';
+  return '未知站点';
 };
 
 const formatDate = (dateStr: string) => {
@@ -345,15 +362,6 @@ const submitForm = async () => {
       loading.value = true;
 
       try {
-        // 处理时间格式
-        if (stopTimeForm.arrivalTime instanceof Date) {
-          stopTimeForm.arrivalTime = format(stopTimeForm.arrivalTime, 'HH:mm:ss');
-        }
-        
-        if (stopTimeForm.departureTime instanceof Date) {
-          stopTimeForm.departureTime = format(stopTimeForm.departureTime, 'HH:mm:ss');
-        }
-
         // 设置停靠点的顺序
         const stop = routeStops.value.find(s => s.id === stopTimeForm.stopId);
         if (stop) {

@@ -94,16 +94,6 @@ const routes = [
         },
       },
       {
-        path: 'train-management',
-        name: 'TrainManagement',
-        component: () => import('../views/admin/TrainManagement.vue'),
-        meta: {
-          requiresAuth: true,
-          requiredRoles: [ROLE_NAMES.ADMIN, ROLE_NAMES.SUPER_ADMIN],
-          title: '车次管理',
-        },
-      },
-      {
         path: 'line-management',
         name: 'LineManagement',
         component: () => import('../views/admin/LineManagement.vue'),
