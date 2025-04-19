@@ -11,12 +11,12 @@
     <!-- Information Cards Section -->
     <div class="info-section">
       <el-row :gutter="30">
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="6">
           <el-card shadow="hover" class="info-card">
             <template #header>
               <div class="card-header">
                 <i class="el-icon-map-location"></i>
-                <span>列车线路信息</span>
+                <span>线路查询</span>
               </div>
             </template>
             <div class="card-content">
@@ -32,12 +32,12 @@
           </el-card>
         </el-col>
 
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="6">
           <el-card shadow="hover" class="info-card">
             <template #header>
               <div class="card-header">
                 <i class="el-icon-time"></i>
-                <span>到站发车时刻</span>
+                <span>时刻查询</span>
               </div>
             </template>
             <div class="card-content">
@@ -53,12 +53,12 @@
           </el-card>
         </el-col>
 
-        <el-col :xs="24" :sm="8">
+        <el-col :xs="24" :sm="6">
           <el-card shadow="hover" class="info-card">
             <template #header>
               <div class="card-header">
                 <i class="el-icon-chat-line-square"></i>
-                <span>用户反馈</span>
+                <span>发表评价</span>
               </div>
             </template>
             <div class="card-content">
@@ -69,6 +69,27 @@
                 @click="$router.push('/metro/feedback')"
               >
                 提交反馈
+              </el-button>
+            </div>
+          </el-card>
+        </el-col>
+
+        <el-col :xs="24" :sm="6">
+          <el-card shadow="hover" class="info-card">
+            <template #header>
+              <div class="card-header">
+                <i class="el-icon-document"></i>
+                <span>提交需求</span>
+              </div>
+            </template>
+            <div class="card-content">
+              <p>向地铁管理部门提交您的功能需求和改进建议</p>
+              <el-button
+                type="primary"
+                plain
+                @click="$router.push('/metro/request')"
+              >
+                提交需求
               </el-button>
             </div>
           </el-card>
