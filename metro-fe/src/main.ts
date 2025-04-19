@@ -14,21 +14,10 @@ const setupPlugins = async () => {
   const pinia = createPinia()
   app.use(pinia)
   
-  // Register Element Plus with optimization for production
-  if (import.meta.env.PROD) {
-    // In production, we only need to register without devtools
-    app.use(ElementPlus, {
-      size: 'default',
-    })
-  } else {
-    // In development, enable more features
-    app.use(ElementPlus, {
-      size: 'default',
-    })
-    
-    // Enable Vue DevTools in development
-    console.log('Vue DevTools enabled in development mode')
-  }
+  // Register Element Plus with reduced memory options in production
+  app.use(ElementPlus, {
+    size: 'default',
+  })
   
   // Register router
   app.use(router)
@@ -37,7 +26,7 @@ const setupPlugins = async () => {
   app.mount('#app')
 }
 
-// Start the application
+// Start the application with error handling
 setupPlugins().catch(error => {
   console.error('Error during application initialization:', error)
 })

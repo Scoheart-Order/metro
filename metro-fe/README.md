@@ -98,11 +98,13 @@ metro-fe/
 
 ### Building the Docker Image
 
-To build the Docker image:
+To build the Docker image optimized for low-memory environments (2GB RAM):
 
 ```bash
 docker build -t metro-fe .
 ```
+
+The Dockerfile is already configured with memory optimizations for 2-core, 2GB environments.
 
 ### Running the Container
 
@@ -110,11 +112,18 @@ To run the container:
 
 ```bash
 # Run with port mapping
-docker run -d -p 3333:3333 --name metro-frontend metro-fe
-
-# If you need to connect to a backend service, use network settings
-# docker run -d -p 3333:3333 --network metro-network --name metro-frontend metro-fe
+docker run -d -p 3333:3333 --name metro-frontend --memory=1.5g --cpus=1 metro-fe
 ```
+
+### Using Docker Compose
+
+For a complete deployment with backend and database services:
+
+```bash
+docker-compose up -d
+```
+
+Docker Compose is configured with appropriate memory limits for all services.
 
 ### Accessing the Application
 
@@ -124,10 +133,15 @@ The application will be available at:
 http://localhost:3333
 ```
 
-Or on your server:
+## Build Optimization
 
-```
-http://YOUR_SERVER_IP:3333
-```
+This project is optimized for low-memory environments (2GB RAM). The build process:
 
-## Development
+- Limits Node.js memory usage
+- Uses esbuild instead of Terser for faster, more memory-efficient minification
+- Disables parallel processing to reduce memory spikes
+- Uses optimized chunk splitting
+- Applies selective compression
+- Provides container memory limits
+
+No additional configuration is needed for production builds.

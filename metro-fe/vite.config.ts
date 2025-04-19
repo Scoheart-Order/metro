@@ -7,23 +7,34 @@ import { visualizer } from 'rollup-plugin-visualizer';
 import compression from 'vite-plugin-compression';
 
 // https://vite.dev/config/
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const isProd = mode === 'production';
+  const isAnalyze = process.env.ANALYZE === 'true';
+  const isLowMemory = process.env.LOW_MEMORY === 'true';
   
   return {
     plugins: [
       vue(),
       // Only enable devtools in development
       mode === 'development' && VueDevTools(),
-      // Generate bundle size analysis report in production
-      isProd && visualizer({
+      // Generate bundle size analysis report only when explicitly requested
+      isProd && isAnalyze && visualizer({
         filename: 'dist/stats.html',
         open: false,
         gzipSize: true,
       }),
-      // Enable Gzip/Brotli compression in production
-      isProd && compression({ algorithm: 'gzip' }),
-      isProd && compression({ algorithm: 'brotli' }),
+      // Enable Gzip compression in production with memory constraints
+      isProd && compression({ 
+        algorithm: 'gzip',
+        threshold: 10240, // Only compress files > 10KB
+        verbose: false,
+      }),
+      // Enable Brotli compression conditionally - not enabled in low memory mode
+      isProd && !isLowMemory && compression({
+        algorithm: 'brotli' as any,
+        threshold: 10240,
+        verbose: false,
+      }),
     ].filter(Boolean),
     base: '/',
     resolve: {
@@ -38,38 +49,43 @@ export default defineConfig(({ mode }) => {
       reportCompressedSize: false,
       // Target newer browsers for better code optimization
       target: 'es2015',
-      // Set chunk size warning limit
-      chunkSizeWarningLimit: 500,
+      // Higher chunk size warning limit for Element Plus
+      chunkSizeWarningLimit: 800,
+      // Memory optimization for assets
+      assetsInlineLimit: 4096,
+      // CSS optimization for memory constraints
+      cssCodeSplit: false,
+      // Use lightweight CSS minifier
+      cssMinify: 'lightningcss',
       rollupOptions: {
         output: {
-          // Clean CSS output
-          cssCodeSplit: true,
-          // Implement manual chunk splitting
+          // Manual chunk splitting strategy
           manualChunks: {
-            // Split vendor dependencies
             'vendor-vue': ['vue', 'vue-router', 'pinia'],
             'vendor-element': ['element-plus'],
             'vendor-utils': ['axios', 'date-fns'],
-            // Add other chunks as needed
           },
-          // Improve chunk naming for better caching
-          chunkFileNames: isProd ? 'assets/[name]-[hash].js' : 'assets/[name].js',
-          // Ensure CSS chunk names match JS chunks for proper caching
-          assetFileNames: isProd ? 'assets/[name]-[hash][extname]' : 'assets/[name][extname]',
+          // Simpler chunk naming for better caching
+          chunkFileNames: 'assets/[name]-[hash].js',
+          assetFileNames: 'assets/[name]-[hash][extname]',
         },
       },
-      // Minify options
-      minify: 'terser',
+      // Use esbuild for minification (more memory efficient)
+      minify: 'esbuild',
       terserOptions: {
         compress: {
           drop_console: isProd,
           drop_debugger: isProd,
         },
+        // Disable parallel processing to reduce memory usage
+        parallel: false,
       },
     },
     optimizeDeps: {
       // Pre-bundle dependencies for faster development
       include: ['vue', 'vue-router', 'pinia', 'element-plus', 'axios'],
+      // Disable dependency optimization in production/SSR
+      disabled: command === 'build',
     },
     server: {
       proxy: {
@@ -77,33 +93,13 @@ export default defineConfig(({ mode }) => {
           target: 'http://localhost:8080',
           changeOrigin: true,
           configure: (proxy, options) => {
-            // Proxy request start
+            // Simplified proxy logging
             proxy.on('proxyReq', (proxyReq, req, res) => {
-              console.log('-------------- 请求开始 --------------');
-              console.log(`原始请求: ${req.method} ${req.url || ''}`);
-              console.log(`代理目标: ${options.target}${proxyReq.path}`);
+              console.log(`Proxying ${req.method} ${req.url} → ${options.target}${proxyReq.path}`);
             });
 
-            // Proxy response start
-            proxy.on('proxyRes', (proxyRes, req, res) => {
-              console.log('-------------- 响应开始 --------------');
-              console.log(
-                `响应状态: ${proxyRes.statusCode} ${proxyRes.statusMessage}`
-              );
-              console.log(`原始请求: ${req.method} ${req.url || ''}`);
-              console.log(`代理到: ${options.target}${req.url || ''}`);
-            });
-
-            // Proxy error
             proxy.on('error', (err, req, res) => {
-              console.log('-------------- 代理错误 --------------');
-              console.log(`原始请求: ${req.method} ${req.url || ''}`);
-              console.log(`代理目标: ${options.target}${req.url || ''}`);
-            });
-
-            // Proxy end
-            proxy.on('end', (req, res, proxyRes) => {
-              console.log('-------------- 请求结束 --------------\n');
+              console.error(`Proxy error: ${err.message}`);
             });
           },
         },

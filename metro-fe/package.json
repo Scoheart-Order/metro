@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env LAUNCH_EDITOR=cursor vite --host --open",
-    "build": "vite build",
-    "build:analyze": "cross-env ANALYZE=true vite build",
-    "build:prod": "vite build --mode production",
+    "build": "cross-env LOW_MEMORY=true NODE_OPTIONS=--max-old-space-size=1536 vite build --mode production",
     "preview": "vite preview"
   },
   "dependencies": {
