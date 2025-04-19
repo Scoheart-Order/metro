@@ -34,39 +34,51 @@ public class TrainTripServiceImpl implements TrainTripService {
         // 预加载所有涉及到的路线信息，提高性能
         List<Long> routeIds = trainTrips.stream()
                 .map(TrainTrip::getRouteId)
+                .filter(routeId -> routeId != null) // 确保只处理非空的routeId
                 .distinct()
                 .collect(Collectors.toList());
         
         // 获取所有相关路线
-        List<Route> routes = routeIds.stream()
-                .map(routeMapper::getRouteById)
-                .filter(route -> route != null)
-                .collect(Collectors.toList());
-        
-        // 预加载所有涉及到的线路信息
-        List<Long> lineIds = routes.stream()
-                .map(Route::getLineId)
-                .distinct()
-                .collect(Collectors.toList());
-        
-        // 获取所有相关线路并创建映射
-        Map<Long, Line> lineMap = lineIds.stream()
-                .map(lineMapper::getLineById)
-                .filter(line -> line != null)
-                .collect(Collectors.toMap(Line::getId, line -> line));
-        
-        // 将线路信息加载到路线中
-        for (Route route : routes) {
-            route.setLine(lineMap.get(route.getLineId()));
+        Map<Long, Route> routeMap = new java.util.HashMap<>();
+        if (!routeIds.isEmpty()) {
+            List<Route> routes = routeIds.stream()
+                    .map(routeMapper::getRouteById)
+                    .filter(route -> route != null)
+                    .collect(Collectors.toList());
+            
+            // 预加载所有涉及到的线路信息
+            List<Long> lineIds = routes.stream()
+                    .map(Route::getLineId)
+                    .filter(lineId -> lineId != null) // 确保只处理非空的lineId
+                    .distinct()
+                    .collect(Collectors.toList());
+            
+            // 获取所有相关线路并创建映射
+            Map<Long, Line> lineMap = new java.util.HashMap<>();
+            if (!lineIds.isEmpty()) {
+                lineMap = lineIds.stream()
+                        .map(lineMapper::getLineById)
+                        .filter(line -> line != null)
+                        .collect(Collectors.toMap(Line::getId, line -> line));
+            }
+            
+            // 将线路信息加载到路线中
+            for (Route route : routes) {
+                if (route.getLineId() != null) {
+                    route.setLine(lineMap.get(route.getLineId()));
+                }
+            }
+            
+            // 创建路线ID到路线的映射
+            routeMap = routes.stream()
+                    .collect(Collectors.toMap(Route::getId, route -> route));
         }
-        
-        // 创建路线ID到路线的映射
-        Map<Long, Route> routeMap = routes.stream()
-                .collect(Collectors.toMap(Route::getId, route -> route));
         
         // 将路线信息加载到列车行程实体中
         for (TrainTrip trainTrip : trainTrips) {
-            trainTrip.setRoute(routeMap.get(trainTrip.getRouteId()));
+            if (trainTrip.getRouteId() != null) {
+                trainTrip.setRoute(routeMap.get(trainTrip.getRouteId()));
+            }
         }
         
         return trainTrips.stream()
@@ -81,13 +93,17 @@ public class TrainTripServiceImpl implements TrainTripService {
             throw new BusinessException("列车行程不存在: " + id);
         }
         
-        // 加载路线信息
-        Route route = routeMapper.getRouteById(trainTrip.getRouteId());
-        if (route != null) {
-            // 加载线路信息
-            Line line = lineMapper.getLineById(route.getLineId());
-            route.setLine(line);
-            trainTrip.setRoute(route);
+        // 如果有路线ID，则加载路线信息
+        if (trainTrip.getRouteId() != null) {
+            Route route = routeMapper.getRouteById(trainTrip.getRouteId());
+            if (route != null) {
+                // 如果路线有线路ID，则加载线路信息
+                if (route.getLineId() != null) {
+                    Line line = lineMapper.getLineById(route.getLineId());
+                    route.setLine(line);
+                }
+                trainTrip.setRoute(route);
+            }
         }
         
         return convertToDto(trainTrip);
@@ -101,9 +117,11 @@ public class TrainTripServiceImpl implements TrainTripService {
             throw new BusinessException("路线不存在: " + routeId);
         }
         
-        // 加载线路信息
-        Line line = lineMapper.getLineById(route.getLineId());
-        route.setLine(line);
+        // 如果路线有线路ID，则加载线路信息
+        if (route.getLineId() != null) {
+            Line line = lineMapper.getLineById(route.getLineId());
+            route.setLine(line);
+        }
         
         List<TrainTrip> trainTrips = trainTripMapper.selectByRouteId(routeId);
         
@@ -148,22 +166,26 @@ public class TrainTripServiceImpl implements TrainTripService {
     @Override
     @Transactional
     public TrainTripDto createTrainTrip(TrainTripDto trainTripDto) {
-        // 验证路线是否存在
-        Route route = routeMapper.getRouteById(trainTripDto.getRouteId());
-        if (route == null) {
-            throw new BusinessException("路线不存在: " + trainTripDto.getRouteId());
+        TrainTrip trainTrip = convertToEntity(trainTripDto);
+        
+        // 如果提供了routeId，验证路线是否存在
+        if (trainTripDto.getRouteId() != null) {
+            Route route = routeMapper.getRouteById(trainTripDto.getRouteId());
+            if (route == null) {
+                throw new BusinessException("路线不存在: " + trainTripDto.getRouteId());
+            }
+            
+            // 加载线路信息
+            if (route.getLineId() != null) {
+                Line line = lineMapper.getLineById(route.getLineId());
+                route.setLine(line);
+            }
+            
+            // 设置路线信息
+            trainTrip.setRoute(route);
         }
         
-        // 加载线路信息
-        Line line = lineMapper.getLineById(route.getLineId());
-        route.setLine(line);
-        
-        TrainTrip trainTrip = convertToEntity(trainTripDto);
         trainTripMapper.insert(trainTrip);
-        
-        // 设置路线信息
-        trainTrip.setRoute(route);
-        
         return convertToDto(trainTrip);
     }
     
@@ -175,23 +197,27 @@ public class TrainTripServiceImpl implements TrainTripService {
             throw new BusinessException("列车行程不存在: " + id);
         }
         
-        // 验证路线是否存在
-        Route route = routeMapper.getRouteById(trainTripDto.getRouteId());
-        if (route == null) {
-            throw new BusinessException("路线不存在: " + trainTripDto.getRouteId());
-        }
-        
-        // 加载线路信息
-        Line line = lineMapper.getLineById(route.getLineId());
-        route.setLine(line);
-        
         TrainTrip trainTrip = convertToEntity(trainTripDto);
         trainTrip.setId(id);
+        
+        // 如果提供了routeId，验证路线是否存在
+        if (trainTripDto.getRouteId() != null) {
+            Route route = routeMapper.getRouteById(trainTripDto.getRouteId());
+            if (route == null) {
+                throw new BusinessException("路线不存在: " + trainTripDto.getRouteId());
+            }
+            
+            // 加载线路信息
+            if (route.getLineId() != null) {
+                Line line = lineMapper.getLineById(route.getLineId());
+                route.setLine(line);
+            }
+            
+            // 设置路线信息
+            trainTrip.setRoute(route);
+        }
+        
         trainTripMapper.update(trainTrip);
-        
-        // 设置路线信息
-        trainTrip.setRoute(route);
-        
         return convertToDto(trainTrip);
     }
     
@@ -224,7 +250,16 @@ public class TrainTripServiceImpl implements TrainTripService {
             if (trainTrip.getRoute().getLine() != null) {
                 dto.setLineName(trainTrip.getRoute().getLine().getName());
                 dto.setLineColor(trainTrip.getRoute().getLine().getColor());
+            } else {
+                // 为空字段设置默认值，而不是null
+                dto.setLineName("");
+                dto.setLineColor("");
             }
+        } else {
+            // 为空字段设置默认值，而不是null
+            dto.setRouteName("");
+            dto.setLineName("");
+            dto.setLineColor("");
         }
         
         return dto;

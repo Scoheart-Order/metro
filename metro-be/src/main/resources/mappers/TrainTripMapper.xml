@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.TrainTripMapper">
+
+    <!-- 定义TrainTrip的结果映射 -->
+    <resultMap id="trainTripResultMap" type="com.scoding.metro.entity.TrainTrip">
+        <id property="id" column="id"/>
+        <result property="routeId" column="route_id"/>
+        <result property="trainNumber" column="train_number"/>
+        <result property="runDate" column="run_date"/>
+    </resultMap>
+
+    <!-- 获取所有列车行程 -->
+    <select id="selectAll" resultMap="trainTripResultMap">
+        SELECT id, route_id, train_number, run_date
+        FROM train_trip
+    </select>
+
+    <!-- 根据ID获取列车行程 -->
+    <select id="selectById" parameterType="java.lang.Long" resultMap="trainTripResultMap">
+        SELECT id, route_id, train_number, run_date
+        FROM train_trip
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据路线ID获取列车行程 -->
+    <select id="selectByRouteId" parameterType="java.lang.Long" resultMap="trainTripResultMap">
+        SELECT id, route_id, train_number, run_date
+        FROM train_trip
+        WHERE route_id = #{routeId}
+    </select>
+
+    <!-- 插入列车行程 -->
+    <insert id="insert" parameterType="com.scoding.metro.entity.TrainTrip" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO train_trip(route_id, train_number, run_date)
+        VALUES(#{routeId}, #{trainNumber}, #{runDate})
+    </insert>
+
+    <!-- 更新列车行程 -->
+    <update id="update" parameterType="com.scoding.metro.entity.TrainTrip">
+        UPDATE train_trip
+        SET route_id = #{routeId},
+            train_number = #{trainNumber},
+            run_date = #{runDate}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除列车行程 -->
+    <delete id="delete" parameterType="java.lang.Long">
+        DELETE FROM train_trip
+        WHERE id = #{id}
+    </delete>
+</mapper> 

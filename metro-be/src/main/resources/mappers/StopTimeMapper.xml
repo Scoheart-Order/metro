@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.scoding.metro.mapper.StopTimeMapper">
+
+    <!-- 定义StopTime的结果映射 -->
+    <resultMap id="stopTimeResultMap" type="com.scoding.metro.entity.StopTime">
+        <id property="id" column="id"/>
+        <result property="trainTripId" column="train_trip_id"/>
+        <result property="stopId" column="stop_id"/>
+        <result property="arrivalTime" column="arrival_time"/>
+        <result property="departureTime" column="departure_time"/>
+        <result property="stopSeq" column="stop_seq"/>
+    </resultMap>
+
+    <!-- 获取所有到站时刻 -->
+    <select id="selectAll" resultMap="stopTimeResultMap">
+        SELECT id, train_trip_id, stop_id, arrival_time, departure_time, stop_seq
+        FROM stop_time
+    </select>
+
+    <!-- 根据ID获取到站时刻 -->
+    <select id="selectById" parameterType="java.lang.Long" resultMap="stopTimeResultMap">
+        SELECT id, train_trip_id, stop_id, arrival_time, departure_time, stop_seq
+        FROM stop_time
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据列车行程ID获取到站时刻 -->
+    <select id="selectByTrainTripId" parameterType="java.lang.Long" resultMap="stopTimeResultMap">
+        SELECT id, train_trip_id, stop_id, arrival_time, departure_time, stop_seq
+        FROM stop_time
+        WHERE train_trip_id = #{trainTripId}
+        ORDER BY stop_seq
+    </select>
+
+    <!-- 根据停靠点ID获取到站时刻 -->
+    <select id="selectByStopId" parameterType="java.lang.Long" resultMap="stopTimeResultMap">
+        SELECT id, train_trip_id, stop_id, arrival_time, departure_time, stop_seq
+        FROM stop_time
+        WHERE stop_id = #{stopId}
+    </select>
+
+    <!-- 插入到站时刻 -->
+    <insert id="insert" parameterType="com.scoding.metro.entity.StopTime" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO stop_time(train_trip_id, stop_id, arrival_time, departure_time, stop_seq)
+        VALUES(#{trainTripId}, #{stopId}, #{arrivalTime}, #{departureTime}, #{stopSeq})
+    </insert>
+
+    <!-- 更新到站时刻 -->
+    <update id="update" parameterType="com.scoding.metro.entity.StopTime">
+        UPDATE stop_time
+        SET train_trip_id = #{trainTripId},
+            stop_id = #{stopId},
+            arrival_time = #{arrivalTime},
+            departure_time = #{departureTime},
+            stop_seq = #{stopSeq}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除到站时刻 -->
+    <delete id="delete" parameterType="java.lang.Long">
+        DELETE FROM stop_time
+        WHERE id = #{id}
+    </delete>
+</mapper> 

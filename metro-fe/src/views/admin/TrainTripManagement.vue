@@ -65,7 +65,11 @@
       empty-text="暂无列车行程数据"
     >
       <el-table-column prop="id" label="ID" width="80" sortable />
-      <el-table-column prop="trainNumber" label="列车车次" width="120" />
+      <el-table-column label="列车车次" width="120">
+        <template #default="scope">
+          {{ scope.row.trainNumber || '未设置' }}
+        </template>
+      </el-table-column>
       <el-table-column label="所属线路" width="150">
         <template #default="scope">
           <div class="line-option" v-if="getRouteLineId(scope.row.routeId)">
@@ -80,12 +84,12 @@
       </el-table-column>
       <el-table-column label="行驶方向" width="200">
         <template #default="scope">
-          {{ getRouteName(scope.row.routeId) }}
+          {{ scope.row.routeId ? getRouteName(scope.row.routeId) : '未设置' }}
         </template>
       </el-table-column>
       <el-table-column label="运行日期" width="120" sortable>
         <template #default="scope">
-          {{ formatDate(scope.row.runDate) }}
+          {{ scope.row.runDate ? formatDate(scope.row.runDate) : '未设置' }}
         </template>
       </el-table-column>
       <el-table-column label="操作">
@@ -238,15 +242,15 @@ const filteredRoutes = computed(() => {
 
 // 分页和过滤后的行程数据
 const filteredTrainTrips = computed(() => {
-  // 先过滤掉routeId为null或undefined的行程
-  let filtered = metroStore.trainTrips.filter(trip => trip.routeId != null);
+  // 不过滤掉routeId为null或undefined的行程
+  let filtered = metroStore.trainTrips;
 
   // 按线路筛选
   if (lineFilter.value) {
     const routeIds = metroStore.routes
       .filter((route) => route.lineId === lineFilter.value)
       .map((route) => route.id);
-    filtered = filtered.filter((trip) => routeIds.includes(trip.routeId));
+    filtered = filtered.filter((trip) => trip.routeId && routeIds.includes(trip.routeId));
   }
 
   // 按路线筛选
@@ -348,7 +352,8 @@ const getLineName = (lineId: number | null) => {
   return line ? line.name : '未知线路';
 };
 
-const getRouteName = (routeId: number) => {
+const getRouteName = (routeId: number | null) => {
+  if (routeId === null) return '未知方向';
   const route = metroStore.routes.find((r) => r.id === routeId);
   return route ? route.name : '未知方向';
 };

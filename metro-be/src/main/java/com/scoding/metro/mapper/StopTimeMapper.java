@@ -1,35 +1,69 @@
 package com.scoding.metro.mapper;
 
 import com.scoding.metro.entity.StopTime;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
+/**
+ * 到站时刻数据访问接口
+ * SQL查询已移至XML映射文件
+ */
 @Mapper
 public interface StopTimeMapper {
     
-    @Select("SELECT * FROM stop_time")
+    /**
+     * 查询所有到站时刻
+     * 
+     * @return 到站时刻列表
+     */
     List<StopTime> selectAll();
     
-    @Select("SELECT * FROM stop_time WHERE id = #{id}")
+    /**
+     * 根据ID查询到站时刻
+     * 
+     * @param id 到站时刻ID
+     * @return 到站时刻信息
+     */
     StopTime selectById(Long id);
     
-    @Select("SELECT * FROM stop_time WHERE train_trip_id = #{trainTripId} ORDER BY stop_seq")
+    /**
+     * 根据列车行程ID查询到站时刻
+     * 
+     * @param trainTripId 列车行程ID
+     * @return 到站时刻列表
+     */
     List<StopTime> selectByTrainTripId(Long trainTripId);
     
-    @Select("SELECT * FROM stop_time WHERE stop_id = #{stopId}")
+    /**
+     * 根据停靠点ID查询到站时刻
+     * 
+     * @param stopId 停靠点ID
+     * @return 到站时刻列表
+     */
     List<StopTime> selectByStopId(Long stopId);
     
-    @Insert("INSERT INTO stop_time(train_trip_id, stop_id, arrival_time, departure_time, stop_seq) " +
-            "VALUES(#{trainTripId}, #{stopId}, #{arrivalTime}, #{departureTime}, #{stopSeq})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
+    /**
+     * 插入到站时刻
+     * 
+     * @param stopTime 到站时刻信息
+     * @return 影响行数
+     */
     int insert(StopTime stopTime);
     
-    @Update("UPDATE stop_time SET train_trip_id = #{trainTripId}, stop_id = #{stopId}, " +
-            "arrival_time = #{arrivalTime}, departure_time = #{departureTime}, " +
-            "stop_seq = #{stopSeq} WHERE id = #{id}")
+    /**
+     * 更新到站时刻
+     * 
+     * @param stopTime 到站时刻信息
+     * @return 影响行数
+     */
     int update(StopTime stopTime);
     
-    @Delete("DELETE FROM stop_time WHERE id = #{id}")
+    /**
+     * 删除到站时刻
+     * 
+     * @param id 到站时刻ID
+     * @return 影响行数
+     */
     int delete(Long id);
 } 
