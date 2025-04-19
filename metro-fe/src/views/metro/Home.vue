@@ -24,7 +24,7 @@
               <el-button
                 type="primary"
                 plain
-                @click="$router.push('/route-info')"
+                @click="$router.push('/metro/route-info')"
               >
                 查看线路地图
               </el-button>
@@ -45,7 +45,7 @@
               <el-button
                 type="primary"
                 plain
-                @click="$router.push('/train-info')"
+                @click="$router.push('/metro/train-info')"
               >
                 查看列车时刻
               </el-button>
@@ -66,7 +66,7 @@
               <el-button
                 type="primary"
                 plain
-                @click="$router.push('/feedback')"
+                @click="$router.push('/metro/feedback')"
               >
                 提交反馈
               </el-button>
@@ -166,7 +166,7 @@ const handleSearch = async () => {
 
     // Navigate to train info page with search parameters
     router.push({
-      path: '/train-info',
+      path: '/metro/train-info',
       query: {
         startStation: searchForm.startStation,
         endStation: searchForm.endStation,

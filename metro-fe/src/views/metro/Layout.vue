@@ -13,16 +13,16 @@
               :default-active="activeRoute"
               router
             >
-              <el-menu-item index="/">首页</el-menu-item>
-              <el-sub-menu index="/train">
+              <el-menu-item index="/metro">首页</el-menu-item>
+              <el-sub-menu index="/metro/train">
                 <template #title>地铁信息</template>
-                <el-menu-item index="/route-info">线路查询</el-menu-item>
-                <el-menu-item index="/train-info">时刻查询</el-menu-item>
+                <el-menu-item index="/metro/route-info">线路查询</el-menu-item>
+                <el-menu-item index="/metro/train-info">时刻查询</el-menu-item>
               </el-sub-menu>
-              <el-sub-menu index="/feedback">
+              <el-sub-menu index="/metro/feedback">
                 <template #title>评价与需求</template>
-                <el-menu-item index="/feedback">发表评价</el-menu-item>
-                <el-menu-item index="/request">提交需求</el-menu-item>
+                <el-menu-item index="/metro/feedback">发表评价</el-menu-item>
+                <el-menu-item index="/metro/request">提交需求</el-menu-item>
               </el-sub-menu>
             </el-menu>
           </div>
@@ -35,7 +35,7 @@
                 </div>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item @click="$router.push('/profile')"
+                    <el-dropdown-item @click="$router.push('/metro/profile')"
                       >个人信息</el-dropdown-item
                     >
                     <el-dropdown-item divided @click="handleLogout"
