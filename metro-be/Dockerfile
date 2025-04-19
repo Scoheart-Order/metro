@@ -11,12 +11,11 @@ COPY settings.xml /root/.m2/
 
 # 分两步复制并安装依赖，利用Docker缓存层
 COPY pom.xml .
-# 使用参数中指定的仓库位置，确保缓存可以被重用
-RUN mvn dependency:go-offline -Dmaven.repo.local=${MAVEN_OPTS#*-Dmaven.repo.local=}
-
+# 使用挂载的外部Maven仓库目录
+RUN mvn dependency:go-offline -Dmaven.repo.local=${MAVEN_OPTS#*=}
 # 只有当源代码改变时才会重新构建
 COPY src ./src
-RUN mvn clean package -DskipTests -Dmaven.repo.local=${MAVEN_OPTS#*-Dmaven.repo.local=}
+RUN mvn clean package -DskipTests -Dmaven.repo.local=${MAVEN_OPTS#*=}
 
 FROM openjdk:17-jdk-slim
 WORKDIR /app

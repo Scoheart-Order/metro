@@ -1,11 +1,6 @@
 spring:
   profiles:
     active: dev
-  sql:
-    init:
-      mode: always
-      schema-locations: classpath:sql/schema-update.sql
-      continue-on-error: true
 
 mybatis:
   mapper-locations: classpath:mappers/*.xml
@@ -36,3 +31,24 @@ management:
   endpoint:
     health:
       show-details: always
+
+# User initialization configuration
+app:
+  init:
+    users:
+      super-admin:
+        username: superadmin
+        password: 88888888
+        role: ROLE_SUPER_ADMIN
+        description: 超级管理员
+      admin:
+        username: admin
+        password: 12345678
+        role: ROLE_ADMIN
+        description: 普通管理员
+      user:
+        username: user1
+        password: 88888888
+        role: ROLE_USER
+        description: 普通用户
+        initial-money: 100.0
