@@ -108,33 +108,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { useTrainStore } from '@/stores/train';
+import { onMounted } from 'vue';
 import { useAnnouncementStore } from '@/stores/announcement';
 import { ElMessage } from 'element-plus';
 
-const router = useRouter();
-const trainStore = useTrainStore();
 const announcementStore = useAnnouncementStore();
-
-// Station options (would come from API in real app)
-const stationOptions = ref([
-  { value: 'station1', label: '中心站' },
-  { value: 'station2', label: '北站' },
-  { value: 'station3', label: '南站' },
-  { value: 'station4', label: '东站' },
-  { value: 'station5', label: '西站' },
-  { value: 'station6', label: '机场站' },
-  // More stations would be loaded from API
-]);
-
-// Search form
-const searchForm = reactive({
-  startStation: '',
-  endStation: '',
-  date: new Date(),
-});
 
 // Load data on component mount
 onMounted(async () => {
@@ -145,39 +123,7 @@ onMounted(async () => {
     console.error('Failed to load announcements:', error);
     ElMessage.error('获取公告失败，请刷新页面重试');
   }
-
-  // In a real app, we would also load stations from API
-  // await loadStations()
 });
-
-// Search function
-const handleSearch = async () => {
-  if (!searchForm.startStation || !searchForm.endStation) {
-    ElMessage.warning('请选择出发站和到达站');
-    return;
-  }
-
-  try {
-    await trainStore.searchTrains({
-      startStation: searchForm.startStation,
-      endStation: searchForm.endStation,
-      date: searchForm.date.toISOString().split('T')[0],
-    });
-
-    // Navigate to train info page with search parameters
-    router.push({
-      path: '/metro/train-info',
-      query: {
-        startStation: searchForm.startStation,
-        endStation: searchForm.endStation,
-        date: searchForm.date.toISOString().split('T')[0],
-      },
-    });
-  } catch (error) {
-    console.error('Search error:', error);
-    ElMessage.error('查询失败，请稍后重试');
-  }
-};
 </script>
 
 <style scoped lang="scss">

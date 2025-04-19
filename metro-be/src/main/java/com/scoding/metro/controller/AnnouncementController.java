@@ -24,6 +24,7 @@ public class AnnouncementController {
      * 获取所有公告
      */
     @GetMapping
+    @PreAuthorize("permitAll()")
     public R<List<Announcement>> getAllAnnouncements() {
         return R.ok(announcementService.getAllAnnouncements());
     }
@@ -32,6 +33,7 @@ public class AnnouncementController {
      * 根据ID获取公告
      */
     @GetMapping("/{id}")
+    @PreAuthorize("permitAll()")
     public R<Announcement> getAnnouncementById(@PathVariable Long id) {
         return R.ok(announcementService.getAnnouncementById(id));
     }

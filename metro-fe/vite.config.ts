@@ -31,24 +31,14 @@ export default defineConfig({
               `响应状态: ${proxyRes.statusCode} ${proxyRes.statusMessage}`
             );
             console.log(`原始请求: ${req.method} ${req.url || ''}`);
-            console.log(
-              `代理到: ${options.target}${(req.url || '').replace(
-                /^\/api/,
-                ''
-              )}`
-            );
+            console.log(`代理到: ${options.target}${req.url || ''}`);
           });
 
           // 代理错误
           proxy.on('error', (err, req, res) => {
             console.log('-------------- 代理错误 --------------');
             console.log(`原始请求: ${req.method} ${req.url || ''}`);
-            console.log(
-              `代理目标: ${options.target}${(req.url || '').replace(
-                /^\/api/,
-                ''
-              )}`
-            );
+            console.log(`代理目标: ${options.target}${req.url || ''}`);
           });
 
           // 代理结束
