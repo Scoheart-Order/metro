@@ -149,15 +149,16 @@
 import { ref, reactive, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
 import { metroApi } from '@/api/modules/metro';
-import type { Line, Route, Station, Stop } from '@/api/modules/metro';
+import type { Line, Route, Station, Stop, StopTime } from '@/api/modules/metro';
 
 // 数据状态
 const loading = ref(false);
 const lines = ref<Line[]>([]);
 const routes = ref<Route[]>([]);
 const stations = ref<Station[]>([]);
-const routeStops = ref<Stop[]>([]);
-const stopInfo = ref<Stop | null>(null);
+const routeStops = ref<(Stop & { arrivalTime?: string; departureTime?: string; isTransfer?: boolean })[]>([]);
+const stopInfo = ref<(Stop & { arrivalTime?: string; departureTime?: string; isTransfer?: boolean }) | null>(null);
+const stopTimes = ref<StopTime[]>([]);
 
 // 搜索表单
 const searchForm = reactive({
@@ -194,6 +195,49 @@ const loadStopsByRoute = async (routeId: number) => {
   
   try {
     const stops = await metroApi.getStopsByRouteId(routeId);
+    
+    // 加载该线路的所有列车行程
+    const trainTrips = await metroApi.getTrainTripsByRouteId(routeId);
+    
+    // 如果有列车行程，获取第一个列车行程的停靠时间表
+    if (trainTrips && trainTrips.length > 0) {
+      const trainTripWithTimes = await metroApi.getTrainTripWithStopTimes(trainTrips[0].id);
+      if (trainTripWithTimes && trainTripWithTimes.stopTimeIds) {
+        // 获取所有停靠时间详情
+        const allStopTimes = await Promise.all(
+          trainTripWithTimes.stopTimeIds.map(id => metroApi.getStopTimeById(id))
+        );
+        stopTimes.value = allStopTimes;
+        
+        // 将停靠时间信息合并到站点信息中
+        stops.forEach(stop => {
+          const stopTime = allStopTimes.find(st => st.stopId === stop.id);
+          if (stopTime) {
+            // 为站点添加到站和发车时间
+            (stop as any).arrivalTime = stopTime.arrivalTime ? formatTime(stopTime.arrivalTime) : undefined;
+            (stop as any).departureTime = stopTime.departureTime ? formatTime(stopTime.departureTime) : undefined;
+          }
+        });
+      }
+    }
+    
+    // 获取换乘站信息
+    const allStations = await metroApi.getAllStations();
+    const stationStopCounts = new Map<number, number>();
+    
+    // 统计每个站点被多少条线路使用
+    stops.forEach(stop => {
+      const count = stationStopCounts.get(stop.stationId) || 0;
+      stationStopCounts.set(stop.stationId, count + 1);
+    });
+    
+    // 标记换乘站
+    stops.forEach(stop => {
+      // 获取站点所在的线路数量
+      const routeCount = stationStopCounts.get(stop.stationId) || 0;
+      (stop as any).isTransfer = routeCount > 1;
+    });
+    
     routeStops.value = stops.sort((a, b) => a.seq - b.seq);
     
     // 提取出所有站点ID
@@ -209,6 +253,23 @@ const loadStopsByRoute = async (routeId: number) => {
     console.error('获取停靠点数据失败', error);
     ElMessage.error('获取停靠点数据失败');
   }
+};
+
+// 格式化时间
+const formatTime = (timeString: string): string => {
+  // 如果时间格式是ISO格式或其他需要格式化的格式
+  if (timeString) {
+    try {
+      // 处理时间格式，例如将"10:30:00"转换为"10:30"
+      const timeParts = timeString.split(':');
+      if (timeParts.length >= 2) {
+        return `${timeParts[0]}:${timeParts[1]}`;
+      }
+    } catch (e) {
+      console.error('时间格式化错误', e);
+    }
+  }
+  return timeString;
 };
 
 // 获取特定停靠点信息
@@ -229,7 +290,61 @@ const getStopInfo = async (routeId: number, stationId: number) => {
       return null;
     }
     
-    return stop;
+    // 加载该线路的所有列车行程
+    const trainTrips = await metroApi.getTrainTripsByRouteId(routeId);
+    
+    // 如果有列车行程，获取第一个列车行程的停靠时间表
+    if (trainTrips && trainTrips.length > 0) {
+      const trainTripWithTimes = await metroApi.getTrainTripWithStopTimes(trainTrips[0].id);
+      
+      if (trainTripWithTimes && trainTripWithTimes.stopTimeIds) {
+        // 获取所有停靠时间详情
+        const allStopTimes = await Promise.all(
+          trainTripWithTimes.stopTimeIds.map(id => metroApi.getStopTimeById(id))
+        );
+        
+        // 查找当前站点的停靠时间
+        const stopTime = allStopTimes.find(st => st.stopId === stop.id);
+        if (stopTime) {
+          // 为站点添加到站和发车时间
+          (stop as any).arrivalTime = stopTime.arrivalTime ? formatTime(stopTime.arrivalTime) : undefined;
+          (stop as any).departureTime = stopTime.departureTime ? formatTime(stopTime.departureTime) : undefined;
+        }
+        
+        // 更新routeStops中的时间信息
+        const updatedStops = routeStops.value.map(rs => {
+          const updatedStop = { ...rs };
+          const matchingStopTime = allStopTimes.find(st => st.stopId === rs.id);
+          if (matchingStopTime) {
+            updatedStop.arrivalTime = matchingStopTime.arrivalTime ? formatTime(matchingStopTime.arrivalTime) : undefined;
+            updatedStop.departureTime = matchingStopTime.departureTime ? formatTime(matchingStopTime.departureTime) : undefined;
+          }
+          return updatedStop;
+        });
+        
+        routeStops.value = updatedStops;
+      }
+    }
+    
+    // 判断是否是换乘站
+    const allStations = await metroApi.getAllStations();
+    const stationRoutes = await metroApi.getRoutesByLineId(searchForm.lineId);
+    
+    // 获取站点关联的所有路线
+    const relatedRouteIds = new Set<number>();
+    for (const rt of stationRoutes) {
+      const routeStops = await metroApi.getStopsByRouteId(rt.id);
+      for (const rs of routeStops) {
+        if (rs.stationId === stationId) {
+          relatedRouteIds.add(rt.id);
+        }
+      }
+    }
+    
+    // 如果站点关联的路线数量大于1，则为换乘站
+    (stop as any).isTransfer = relatedRouteIds.size > 1;
+    
+    return stop as (Stop & { arrivalTime?: string; departureTime?: string; isTransfer?: boolean });
   } catch (error) {
     console.error('获取停靠点信息失败', error);
     ElMessage.error('获取停靠点信息失败');
@@ -311,11 +426,11 @@ const getRouteName = (routeId: number): string => {
   return route?.name || '';
 };
 
-const getTimelineItemType = (stop: Stop, currentStopId: number): string => {
+const getTimelineItemType = (stop: any, currentStopId: number): string => {
   return stop.id === currentStopId ? 'primary' : '';
 };
 
-const getTimeDisplay = (stop: Stop): string => {
+const getTimeDisplay = (stop: any): string => {
   const arrival = stop.arrivalTime || '--:--';
   const departure = stop.departureTime || '--:--';
   return `${arrival} - ${departure}`;
