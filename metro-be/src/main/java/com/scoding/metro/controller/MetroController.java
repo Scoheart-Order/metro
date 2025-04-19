@@ -7,6 +7,7 @@ import com.scoding.metro.dto.StationDto;
 import com.scoding.metro.dto.StopDto;
 import com.scoding.metro.dto.TrainTripDto;
 import com.scoding.metro.dto.StopTimeDto;
+import com.scoding.metro.dto.UpdateStopSequencesRequest;
 import com.scoding.metro.service.LineService;
 import com.scoding.metro.service.RouteService;
 import com.scoding.metro.service.StationService;
@@ -609,6 +610,18 @@ public class MetroController {
     @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
     public R<Boolean> deleteStop(@PathVariable Long id) {
         return R.ok(stopService.deleteStop(id));
+    }
+    
+    /**
+     * 批量更新经停站序号
+     *
+     * @param request 包含路线ID和经停站序号的请求
+     * @return 操作结果
+     */
+    @PutMapping("/stops/sequences")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SUPER_ADMIN')")
+    public R<Boolean> updateStopSequences(@RequestBody UpdateStopSequencesRequest request) {
+        return R.ok(stopService.updateStopSequences(request));
     }
     
     // 到站时刻接口

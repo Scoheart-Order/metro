@@ -5,34 +5,75 @@
 
 <mapper namespace="com.scoding.metro.mapper.StopMapper">
 
-    <select id="getAllStops" resultType="com.scoding.metro.entity.Stop">
-        SELECT * FROM stop
+    <!-- Result map for Stop with nested Station and Route objects -->
+    <resultMap id="stopWithDetailsMap" type="com.scoding.metro.entity.Stop">
+        <id property="id" column="id"/>
+        <result property="routeId" column="route_id"/>
+        <result property="stationId" column="station_id"/>
+        <result property="seq" column="seq"/>
+        <association property="station" javaType="com.scoding.metro.entity.Station">
+            <id property="id" column="station.id"/>
+            <result property="name" column="station.name"/>
+            <result property="code" column="station.code"/>
+        </association>
+        <association property="route" javaType="com.scoding.metro.entity.Route">
+            <id property="id" column="route.id"/>
+            <result property="name" column="route.name"/>
+        </association>
+    </resultMap>
+
+    <select id="getAllStops" resultMap="stopWithDetailsMap">
+        SELECT s.*, st.id as "station.id", st.name as "station.name", st.code as "station.code",
+               r.id as "route.id", r.name as "route.name"
+        FROM stop s
+        LEFT JOIN station st ON s.station_id = st.id
+        LEFT JOIN route r ON s.route_id = r.id
     </select>
 
-    <select id="getStopById" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Stop">
-        SELECT * FROM stop WHERE id = #{id}
+    <select id="getStopById" parameterType="java.lang.Long" resultMap="stopWithDetailsMap">
+        SELECT s.*, st.id as "station.id", st.name as "station.name", st.code as "station.code",
+               r.id as "route.id", r.name as "route.name"
+        FROM stop s
+        LEFT JOIN station st ON s.station_id = st.id
+        LEFT JOIN route r ON s.route_id = r.id
+        WHERE s.id = #{id}
     </select>
 
-    <select id="getStopsByRouteId" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Stop">
-        SELECT * FROM stop WHERE route_id = #{routeId} ORDER BY seq
+    <select id="getStopsByRouteId" parameterType="java.lang.Long" resultMap="stopWithDetailsMap">
+        SELECT s.*, st.id as "station.id", st.name as "station.name", st.code as "station.code", 
+               r.id as "route.id", r.name as "route.name"
+        FROM stop s
+        LEFT JOIN station st ON s.station_id = st.id
+        LEFT JOIN route r ON s.route_id = r.id
+        WHERE s.route_id = #{routeId} ORDER BY s.seq
     </select>
 
-    <select id="getStopsByStationId" parameterType="java.lang.Long" resultType="com.scoding.metro.entity.Stop">
-        SELECT * FROM stop WHERE station_id = #{stationId}
+    <select id="getStopsByStationId" parameterType="java.lang.Long" resultMap="stopWithDetailsMap">
+        SELECT s.*, st.id as "station.id", st.name as "station.name", st.code as "station.code",
+               r.id as "route.id", r.name as "route.name"
+        FROM stop s
+        LEFT JOIN station st ON s.station_id = st.id
+        LEFT JOIN route r ON s.route_id = r.id
+        WHERE s.station_id = #{stationId}
     </select>
 
-    <select id="getStopByRouteAndStation" resultType="com.scoding.metro.entity.Stop">
-        SELECT * FROM stop WHERE route_id = #{routeId} AND station_id = #{stationId}
+    <select id="getStopByRouteAndStation" resultMap="stopWithDetailsMap">
+        SELECT s.*, st.id as "station.id", st.name as "station.name", st.code as "station.code",
+               r.id as "route.id", r.name as "route.name"
+        FROM stop s
+        LEFT JOIN station st ON s.station_id = st.id
+        LEFT JOIN route r ON s.route_id = r.id
+        WHERE s.route_id = #{routeId} AND s.station_id = #{stationId}
     </select>
 
     <insert id="insertStop" parameterType="com.scoding.metro.entity.Stop" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO stop(route_id, station_id, seq, arrival_time, departure_time)
-        VALUES(#{routeId}, #{stationId}, #{seq}, #{arrivalTime}, #{departureTime})
+        INSERT INTO stop(route_id, station_id, seq)
+        VALUES(#{routeId}, #{stationId}, #{seq})
     </insert>
 
     <update id="updateStop" parameterType="com.scoding.metro.entity.Stop">
         UPDATE stop SET route_id = #{routeId}, station_id = #{stationId},
-        seq = #{seq}, arrival_time = #{arrivalTime}, departure_time = #{departureTime} 
+        seq = #{seq}
         WHERE id = #{id}
     </update>
 

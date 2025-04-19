@@ -61,6 +61,21 @@ export interface Stop extends StopDto {
   id: number
   routeName?: string
   stationName?: string
+  station?: {
+    id: number
+    name: string
+    code: string
+  }
+  route?: {
+    id: number
+    name: string
+  }
+}
+
+// Stop sequence update interface
+export interface UpdateStopSequencesDto {
+  routeId: number
+  stopSequences: { id: number; seq: number }[]
 }
 
 // TrainTrip interfaces
@@ -233,6 +248,11 @@ export const metroApi = {
 
   deleteStop: (id: number) => {
     return request.delete<boolean>(`/metro/stops/${id}`)
+  },
+
+  // New method for updating stop sequences
+  updateStopSequences: (updateDto: UpdateStopSequencesDto) => {
+    return request.put<boolean>('/metro/stops/sequences', updateDto)
   },
 
   // TrainTrip methods
