@@ -5,6 +5,7 @@ WORKDIR /app
 # 设置 Node.js 内存限制
 ENV NODE_OPTIONS="--max-old-space-size=1536"
 ENV LOW_MEMORY=true
+ENV VITE_DEPS_NO_DISCOVERY=true
 
 # 分段复制和安装以优化缓存利用
 COPY package*.json .npmrc ./

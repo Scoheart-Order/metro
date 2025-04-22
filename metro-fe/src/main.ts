@@ -1,32 +1,28 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
 import App from './App.vue'
 import router from './router/index'
+
+// Import Element Plus styles
+import 'element-plus/dist/index.css'
 
 // Create Vue application instance
 const app = createApp(App)
 
-// Optimize plugin registration
-const setupPlugins = async () => {
+// Setup application
+const setupApp = async () => {
   // Setup Pinia for state management
   const pinia = createPinia()
   app.use(pinia)
   
-  // Register Element Plus with reduced memory options in production
-  app.use(ElementPlus, {
-    size: 'default',
-  })
-  
   // Register router
   app.use(router)
   
-  // Mount application once everything is ready
+  // Mount application
   app.mount('#app')
 }
 
 // Start the application with error handling
-setupPlugins().catch(error => {
+setupApp().catch(error => {
   console.error('Error during application initialization:', error)
 })

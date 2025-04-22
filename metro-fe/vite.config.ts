@@ -5,6 +5,9 @@ import VueDevTools from 'vite-plugin-vue-devtools';
 import { fileURLToPath, URL } from 'node:url';
 import { visualizer } from 'rollup-plugin-visualizer';
 import compression from 'vite-plugin-compression';
+import AutoImport from 'unplugin-auto-import/vite';
+import Components from 'unplugin-vue-components/vite';
+import { ElementPlusResolver } from 'unplugin-vue-components/resolvers';
 
 // https://vite.dev/config/
 export default defineConfig(({ mode, command }) => {
@@ -15,6 +18,13 @@ export default defineConfig(({ mode, command }) => {
   return {
     plugins: [
       vue(),
+      // Add auto import and component resolver for Element Plus
+      AutoImport({
+        resolvers: [ElementPlusResolver()],
+      }),
+      Components({
+        resolvers: [ElementPlusResolver()],
+      }),
       // Only enable devtools in development
       mode === 'development' && VueDevTools(),
       // Generate bundle size analysis report only when explicitly requested
@@ -55,8 +65,8 @@ export default defineConfig(({ mode, command }) => {
       assetsInlineLimit: 4096,
       // CSS optimization for memory constraints
       cssCodeSplit: false,
-      // Use lightweight CSS minifier
-      cssMinify: 'lightningcss',
+      // Use esbuild for CSS minification too (instead of lightningcss that requires additional dependency)
+      cssMinify: 'esbuild',
       rollupOptions: {
         output: {
           // Manual chunk splitting strategy
@@ -84,8 +94,8 @@ export default defineConfig(({ mode, command }) => {
     optimizeDeps: {
       // Pre-bundle dependencies for faster development
       include: ['vue', 'vue-router', 'pinia', 'element-plus', 'axios'],
-      // Disable dependency optimization in production/SSR
-      disabled: command === 'build',
+      // In production builds, we don't need dependency discovery
+      ...(command === 'build' ? { noDiscovery: true } : {})
     },
     server: {
       proxy: {

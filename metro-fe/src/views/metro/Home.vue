@@ -133,7 +133,9 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAnnouncementStore } from '../../stores/announcement';
-import metroBgImage from '@/assets/images/metro-bg.jpg';
+
+// Use a simple background color instead of an image to avoid build issues
+const bgColor = '#1e88e5';
 
 const announcementStore = useAnnouncementStore();
 
@@ -153,7 +155,7 @@ onMounted(async () => {
 .home-container {
   .hero-section {
     background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-      v-bind('url(' + metroBgImage + ')');
+      linear-gradient(to right, #1e88e5, #0d47a1);
     background-size: cover;
     background-position: center;
     color: white;
